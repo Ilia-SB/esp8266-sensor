@@ -81,3 +81,12 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+
+/.vs/
+/__vm/
+/Debug/
+/Release/
+*.componentinfo.xml
+*.atsln
+*.cppproj
