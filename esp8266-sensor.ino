@@ -1,4 +1,4 @@
-#include <MQTTClient.h>
+#include <PubSubClient.h>
 #include <DallasTemperature.h>
 #include <Ticker.h>
 #include <ESP8266HTTPUpdateServer.h>
@@ -20,7 +20,8 @@ float temp;
 bool flagReportTemp = false;
 
 #define ADDR_LEN 3
-const byte address[] = {0x00,0x00,0x0E};
+const byte address[ADDR_LEN] = {0x00,0x00,0x0E};
+char addressStr[ADDR_LEN * 2 + 1];
 
 const char* host = "esp8266-webupdate";
 const char* update_path = "/firmware";
@@ -30,6 +31,7 @@ const char* ssid = "MCR";
 const char* password = "5158088515";
 
 const char* mqttHost = "192.168.1.3";
+const int mqttPort = 1883;
 const char* mqttStatusesTopic = "/ehome/heating/statuses/";
 const char* tempItem = "temp";
 
@@ -39,7 +41,7 @@ ESP8266HTTPUpdateServer httpUpdater;
 HeaterItem heater;
 
 WiFiClient wifiClient;
-MQTTClient mqttClient;
+PubSubClient mqttClient;
 
 Ticker ticker;
 
@@ -70,22 +72,26 @@ void getTemp() {
 }
 
 void publishMessage(float temperature) {
+	if (!mqttClient.connected()) {
+		Serial.println("Disconnected");
+		return;
+	}
 	char topic[100];
 	char payload[10];
 	char addr[ADDR_LEN*2 + 1];
 	uint8_t len = 0;
 	heater.getAddressString(addr, &len);
 	sprintf(topic, "%sitem_%s_%s", mqttStatusesTopic, addr, tempItem);
-	dtostrf(temperature, 4, 2, payload);
-	mqttClient.publish(topic, payload);
+	dtostrf(temperature, 6, 2, payload);
+	//Serial.printf(topic, "%s: %s\n", topic, payload);
+	Serial.println(topic);
+	Serial.println(payload);
+	boolean result = mqttClient.publish(topic, payload, false);
+	Serial.println(result);
 }
 
-void messageReceived(String topic, String payload, char * bytes, unsigned int length) {
-	Serial.print("incoming: ");
-	Serial.print(topic);
-	Serial.print(" - ");
-	Serial.print(payload);
-	Serial.println();
+void messageReceived(char* topic, unsigned char* payload, unsigned int length) {
+
 }
 
 void setup()
@@ -94,6 +100,8 @@ void setup()
 	digitalWrite(LED, HIGH);
 	
 	memcpy(heater.address, address, ADDR_LEN);
+	uint8_t len;
+	heater.getAddressString(addressStr, &len);
 	
 	#ifdef DEBUG
 		Serial.begin(115200);
@@ -122,9 +130,11 @@ void setup()
 	MDNS.addService("http", "tcp", 80);
 	DebugPrintf("HTTPUpdateServer ready! Open http://%s.local%s in your browser and login with username '%s' and password '%s'\n", host, update_path, update_username, update_password);
 	
-	mqttClient.begin(mqttHost, wifiClient);
+	mqttClient.setClient(wifiClient);
+	mqttClient.setServer(mqttHost, mqttPort);
+	mqttClient.setCallback(messageReceived);
 	
-	while (!mqttClient.connect("esp8266", "1", "1")) {
+	while (!mqttClient.connect(addressStr)) {
 		DebugPrint(".");
 		delay(1000);
 	}
@@ -141,6 +151,7 @@ void setup()
 void loop()
 {
 	httpServer.handleClient();
+	mqttClient.loop();
 	
 	if (flagReportTemp) {
 		flagReportTemp = false;
