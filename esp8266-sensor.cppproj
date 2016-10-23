@@ -784,6 +784,9 @@ build.arch=ESP8266
     <Compile Include="config.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="mqtt_interface.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="__vm\.esp8266-sensor.vsarduino.h">
       <SubType>compile</SubType>
     </Compile>

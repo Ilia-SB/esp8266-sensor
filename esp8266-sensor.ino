@@ -99,6 +99,51 @@ void mqttConnect() {
 }
 
 
+boolean parseMessage(const char* topic, const char* payload, char* command, char* item) {
+	//find last slash in topic
+	char* tempItem[MAX_COMMAND_LEN + ADDR_LEN * 2 + 6 + 1]; //item_xxxxxx_MAX_COMMAND_LEN
+	uint8_t slashPosition = strlen(topic) + 1;
+	for (uint8_t i=strlen(topic)-1; i-->0;) {
+		if(topic[i] == '/') {
+			slashPosition = i;
+			break;
+		} 
+	}
+	
+	if (slashPosition == strlen(topic) + 1) {
+		return false;
+	}
+	
+	//copy everything after slash to tempItem
+	memcpy(tempItem, topic + slashPosition + 1, strlen(topic) - slashPosition);
+
+	//find underscores
+	uint8_t _positions[MAX_COMMAND_LEN];
+	uint8_t _found = 0;
+	for (uint8_t i=strlen(tempItem)-1;i++>0;) {
+		if(tempItem[i] == '_') {
+			_positions[_found] = i;
+			_found++;
+			if (_found == 2) {
+				break;
+			}
+		}
+	}
+	
+	if (_found != 2) {
+		return false;
+	}
+		
+	//copy command and item to corresponding buffers
+	uint8_t commandLen = strlen(targetTempItem) - _positions[0];
+	memcpy(command, topic + _positions[0] + 1, commandLen);
+	command[commandLen] = '\0';
+	uint8_t itemLen = _positions[0] - _positions[1] - 1;
+	memcpy(item, topic + _positions[1] + 1, itemLen);
+	item[itemLen] = '\0';
+	
+	return true;
+}
 
 void setup()
 {
