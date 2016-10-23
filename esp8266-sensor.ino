@@ -9,6 +9,7 @@
 #include <ESP8266WiFi.h>
 #include "debug_print.h"
 #include "HeaterItem.h"
+#include "config.h"
 
 #define LED		2
 #define ONE_WIRE 4
@@ -24,15 +25,7 @@ bool flagReportTemp = false;
 const byte address[ADDR_LEN] = {0x00,0x00,0x0E};
 char addressStr[ADDR_LEN * 2 + 1];
 
-const char* host = "esp8266-webupdate";
-const char* update_path = "/firmware";
-const char* update_username = "admin";
-const char* update_password = "admin";
-const char* ssid = "MCR";
-const char* password = "5158088515";
 
-const char* mqttHost = "192.168.1.3";
-const int mqttPort = 1883;
 const char* mqttStatusesTopic = "/ehome/heating/statuses/";
 const char* tempItem = "temp";
 
