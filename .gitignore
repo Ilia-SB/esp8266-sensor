@@ -87,6 +87,3 @@ $RECYCLE.BIN/
 /__vm/
 /Debug/
 /Release/
-*.componentinfo.xml
-*.atsln
-*.cppproj
