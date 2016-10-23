@@ -26,6 +26,7 @@ bool flagReportTemp = false;
 const byte address[ADDR_LEN] = {0x00,0x00,0x0E};
 char addressStr[ADDR_LEN * 2 + 1];
 
+#define MAX_COMMAND_LEN 15
 
 ESP8266WebServer httpServer(80);
 ESP8266HTTPUpdateServer httpUpdater;
@@ -83,16 +84,21 @@ void publishMessage(float temperature) {
 }
 
 void messageReceived(char* topic, unsigned char* payload, unsigned int length) {
-
+	char* item[ADDR_LEN*2+1];
+	char* command[MAX_COMMAND_LEN+1];
+	
 }
 
 void mqttConnect() {
+	DebugPrintln("Connecting to mqtt server");
 	while (!mqttClient.connect(addressStr)) {
 		DebugPrint(".");
 		delay(1000);
 	}
-	mqttClient.subscribe(m
+	mqttClient.subscribe(mqttCommandsTopic);
 }
+
+
 
 void setup()
 {
@@ -150,9 +156,9 @@ void loop()
 	
 	if(!mqttClient.connected()) {
 		mqttConnect();
-	} else {
-		mqttClient.loop();
 	}
+	
+	mqttClient.loop();
 	
 	if (flagReportTemp) {
 		flagReportTemp = false;
