@@ -28,15 +28,15 @@
     <eraseonlaunchrule>1</eraseonlaunchrule>
     <AsfFrameworkConfig>
       <framework-data>
-  <options />
-  <configurations />
-  <files />
-  <documentation help="" />
-  <offline-documentation help="" />
-  <dependencies>
-    <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.28.1" />
-  </dependencies>
-</framework-data>
+        <options />
+        <configurations />
+        <files />
+        <documentation help="" />
+        <offline-documentation help="" />
+        <dependencies>
+          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.28.1" />
+        </dependencies>
+      </framework-data>
     </AsfFrameworkConfig>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -779,6 +779,9 @@ build.arch=ESP8266
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="HeaterItem.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="config.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="__vm\.esp8266-sensor.vsarduino.h">

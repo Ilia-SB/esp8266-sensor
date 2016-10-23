@@ -10,6 +10,7 @@
 #include "debug_print.h"
 #include "HeaterItem.h"
 #include "config.h"
+#include "mqtt_interface.h"
 
 #define LED		2
 #define ONE_WIRE 4
@@ -25,9 +26,6 @@ bool flagReportTemp = false;
 const byte address[ADDR_LEN] = {0x00,0x00,0x0E};
 char addressStr[ADDR_LEN * 2 + 1];
 
-
-const char* mqttStatusesTopic = "/ehome/heating/statuses/";
-const char* tempItem = "temp";
 
 ESP8266WebServer httpServer(80);
 ESP8266HTTPUpdateServer httpUpdater;
@@ -88,6 +86,14 @@ void messageReceived(char* topic, unsigned char* payload, unsigned int length) {
 
 }
 
+void mqttConnect() {
+	while (!mqttClient.connect(addressStr)) {
+		DebugPrint(".");
+		delay(1000);
+	}
+	mqttClient.subscribe(m
+}
+
 void setup()
 {
 	pinMode(LED, OUTPUT);
@@ -127,11 +133,7 @@ void setup()
 	mqttClient.setClient(wifiClient);
 	mqttClient.setServer(mqttHost, mqttPort);
 	mqttClient.setCallback(messageReceived);
-	
-	while (!mqttClient.connect(addressStr)) {
-		DebugPrint(".");
-		delay(1000);
-	}
+	mqttConnect();
 	
 	sensor.begin();
 	sensor.setResolution(12);
@@ -145,7 +147,12 @@ void setup()
 void loop()
 {
 	httpServer.handleClient();
-	mqttClient.loop();
+	
+	if(!mqttClient.connected()) {
+		mqttConnect();
+	} else {
+		mqttClient.loop();
+	}
 	
 	if (flagReportTemp) {
 		flagReportTemp = false;

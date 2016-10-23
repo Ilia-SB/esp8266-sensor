@@ -11,10 +11,8 @@ Global
 		Release|AVR = Release|AVR
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{30AECC7D-9308-49BE-9301-4CE557515244}.Debug|AVR.ActiveCfg = Debug|AVR
-		{30AECC7D-9308-49BE-9301-4CE557515244}.Debug|AVR.Build.0 = Debug|AVR
-		{30AECC7D-9308-49BE-9301-4CE557515244}.Release|AVR.ActiveCfg = Release|AVR
-		{30AECC7D-9308-49BE-9301-4CE557515244}.Release|AVR.Build.0 = Release|AVR
+		{30AECC7D-9308-49BE-9301-4CE557515244}.Debug|AVR.ActiveCfg = Debug|ARM
+		{30AECC7D-9308-49BE-9301-4CE557515244}.Release|AVR.ActiveCfg = Release|ARM
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
