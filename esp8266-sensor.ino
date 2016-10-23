@@ -86,7 +86,9 @@ void publishMessage(float temperature) {
 void messageReceived(char* topic, unsigned char* payload, unsigned int length) {
 	char* item[ADDR_LEN*2+1];
 	char* command[MAX_COMMAND_LEN+1];
-	
+	if (!parseMessage(topic, command, item)) {
+		return;
+	}
 }
 
 void mqttConnect() {
@@ -99,7 +101,7 @@ void mqttConnect() {
 }
 
 
-boolean parseMessage(const char* topic, const char* payload, char* command, char* item) {
+boolean parseMessage(const char* topic, char* command, char* item) {
 	//find last slash in topic
 	char* tempItem[MAX_COMMAND_LEN + ADDR_LEN * 2 + 6 + 1]; //item_xxxxxx_MAX_COMMAND_LEN
 	uint8_t slashPosition = strlen(topic) + 1;
