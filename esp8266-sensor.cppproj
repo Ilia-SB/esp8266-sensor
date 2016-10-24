@@ -51,7 +51,6 @@
     <ListValues>
       <Value>__ESP8266_ESp8266__</Value>
       <Value>__ESP8266_ESP8266__</Value>
-      <Value>_VMDEBUG=1</Value>
       <Value>ARDUINO=106012</Value>
       <Value>ARDUINO_MAIN</Value>
       <Value>F_CPU=80000000L</Value>
@@ -93,7 +92,7 @@
       <Value>../../../esp8266-sensor</Value>
       <Value>C:/Users/User/AppData/Roaming/arduino15/packages/esp8266/hardware/esp8266/2.3.0/tools/sdk/include</Value>
       <Value>C:/Users/User/AppData/Roaming/arduino15/packages/esp8266/hardware/esp8266/2.3.0/tools/sdk/lwip/include</Value>
-      <Value>{build.path}/core</Value>
+      <Value>C:/Users/User/AppData/Local/Temp/VMicroBuilds/esp8266-sensor/esp8266_nodemcuv2/core</Value>
       <Value>C:/Users/User/AppData/Roaming/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2</Value>
       <Value>C:/Users/User/AppData/Roaming/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2/xtensa-lx106-elf</Value>
       <Value>C:/Users/User/AppData/Roaming/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include</Value>
@@ -108,7 +107,6 @@
     <ListValues>
       <Value>__ESP8266_ESp8266__</Value>
       <Value>__ESP8266_ESP8266__</Value>
-      <Value>_VMDEBUG=1</Value>
       <Value>ARDUINO=106012</Value>
       <Value>ARDUINO_MAIN</Value>
       <Value>F_CPU=80000000L</Value>
@@ -150,7 +148,7 @@
       <Value>../../../esp8266-sensor</Value>
       <Value>C:/Users/User/AppData/Roaming/arduino15/packages/esp8266/hardware/esp8266/2.3.0/tools/sdk/include</Value>
       <Value>C:/Users/User/AppData/Roaming/arduino15/packages/esp8266/hardware/esp8266/2.3.0/tools/sdk/lwip/include</Value>
-      <Value>{build.path}/core</Value>
+      <Value>C:/Users/User/AppData/Local/Temp/VMicroBuilds/esp8266-sensor/esp8266_nodemcuv2/core</Value>
       <Value>C:/Users/User/AppData/Roaming/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2</Value>
       <Value>C:/Users/User/AppData/Roaming/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2/xtensa-lx106-elf</Value>
       <Value>C:/Users/User/AppData/Roaming/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include</Value>
@@ -413,7 +411,6 @@ build.arch=ESP8266
     <ListValues>
       <Value>__ESP8266_ESp8266__</Value>
       <Value>__ESP8266_ESP8266__</Value>
-      <Value>_VMDEBUG=1</Value>
       <Value>ARDUINO=106012</Value>
       <Value>ARDUINO_MAIN</Value>
       <Value>F_CPU=80000000L</Value>
@@ -455,7 +452,7 @@ build.arch=ESP8266
       <Value>../../../esp8266-sensor</Value>
       <Value>C:/Users/User/AppData/Roaming/arduino15/packages/esp8266/hardware/esp8266/2.3.0/tools/sdk/include</Value>
       <Value>C:/Users/User/AppData/Roaming/arduino15/packages/esp8266/hardware/esp8266/2.3.0/tools/sdk/lwip/include</Value>
-      <Value>{build.path}/core</Value>
+      <Value>C:/Users/User/AppData/Local/Temp/VMicroBuilds/esp8266-sensor/esp8266_nodemcuv2/core</Value>
       <Value>C:/Users/User/AppData/Roaming/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2</Value>
       <Value>C:/Users/User/AppData/Roaming/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2/xtensa-lx106-elf</Value>
       <Value>C:/Users/User/AppData/Roaming/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include</Value>
@@ -470,7 +467,6 @@ build.arch=ESP8266
     <ListValues>
       <Value>__ESP8266_ESp8266__</Value>
       <Value>__ESP8266_ESP8266__</Value>
-      <Value>_VMDEBUG=1</Value>
       <Value>ARDUINO=106012</Value>
       <Value>ARDUINO_MAIN</Value>
       <Value>F_CPU=80000000L</Value>
@@ -512,7 +508,7 @@ build.arch=ESP8266
       <Value>../../../esp8266-sensor</Value>
       <Value>C:/Users/User/AppData/Roaming/arduino15/packages/esp8266/hardware/esp8266/2.3.0/tools/sdk/include</Value>
       <Value>C:/Users/User/AppData/Roaming/arduino15/packages/esp8266/hardware/esp8266/2.3.0/tools/sdk/lwip/include</Value>
-      <Value>{build.path}/core</Value>
+      <Value>C:/Users/User/AppData/Local/Temp/VMicroBuilds/esp8266-sensor/esp8266_nodemcuv2/core</Value>
       <Value>C:/Users/User/AppData/Roaming/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2</Value>
       <Value>C:/Users/User/AppData/Roaming/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2/xtensa-lx106-elf</Value>
       <Value>C:/Users/User/AppData/Roaming/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include</Value>

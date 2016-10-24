@@ -12,8 +12,9 @@
 #include "config.h"
 #include "mqtt_interface.h"
 
-#define LED		2
-#define ONE_WIRE 4
+#define LED			2
+#define ONE_WIRE	5
+#define RELAY		4
 
 OneWire oneWire(ONE_WIRE);
 DallasTemperature sensor(&oneWire);
@@ -76,19 +77,25 @@ void publishMessage(float temperature) {
 	heater.getAddressString(addr, &len);
 	sprintf(topic, "%sitem_%s_%s", mqttStatusesTopic, addr, tempItem);
 	dtostrf(temperature, 6, 2, payload);
-	//Serial.printf(topic, "%s: %s\n", topic, payload);
-	Serial.println(topic);
-	Serial.println(payload);
 	boolean result = mqttClient.publish(topic, payload, false);
-	Serial.println(result);
 }
 
-void messageReceived(char* topic, unsigned char* payload, unsigned int length) {
-	char* item[ADDR_LEN*2+1];
-	char* command[MAX_COMMAND_LEN+1];
+void messageReceived(char* topic, unsigned char* pld, unsigned int pldLength) {
+	char item[ADDR_LEN*2+1];
+	char command[MAX_COMMAND_LEN+1];
+	char payload[10];
+	
 	if (!parseMessage(topic, command, item)) {
 		return;
 	}
+	
+	//check if command is for this module
+	//if (!)
+	
+	//populate payload
+	memcpy(payload, pld, pldLength);
+	payload[pldLength] = '\0';
+	
 }
 
 void mqttConnect() {
@@ -103,7 +110,7 @@ void mqttConnect() {
 
 boolean parseMessage(const char* topic, char* command, char* item) {
 	//find last slash in topic
-	char* tempItem[MAX_COMMAND_LEN + ADDR_LEN * 2 + 6 + 1]; //item_xxxxxx_MAX_COMMAND_LEN
+	char tempItem[MAX_COMMAND_LEN + ADDR_LEN * 2 + 6 + 1]; //item_xxxxxx_MAX_COMMAND_LEN
 	uint8_t slashPosition = strlen(topic) + 1;
 	for (uint8_t i=strlen(topic)-1; i-->0;) {
 		if(topic[i] == '/') {
@@ -151,6 +158,8 @@ void setup()
 {
 	pinMode(LED, OUTPUT);
 	digitalWrite(LED, HIGH);
+	pinMode(RELAY, OUTPUT);
+	digitalWrite(RELAY, LOW);
 	
 	memcpy(heater.address, address, ADDR_LEN);
 	uint8_t len;
