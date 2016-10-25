@@ -1,3 +1,4 @@
+#include "eepromAddr.h"
 #include <OneWire.h>
 #include <PubSubClient.h>
 #include <DallasTemperature.h>
@@ -20,6 +21,7 @@ OneWire oneWire(ONE_WIRE);
 DallasTemperature sensor(&oneWire);
 
 float temp;
+float hysteresis;
 
 bool flagReportTemp = false;
 
@@ -77,15 +79,15 @@ void publishMessage(float temperature) {
 	heater.getAddressString(addr, &len);
 	sprintf(topic, "%sitem_%s_%s", mqttStatusesTopic, addr, tempItem);
 	dtostrf(temperature, 6, 2, payload);
-	boolean result = mqttClient.publish(topic, payload, false);
+	bool result = mqttClient.publish(topic, payload, false);
 }
 
 void messageReceived(char* topic, unsigned char* pld, unsigned int pldLength) {
-	char item[ADDR_LEN*2+1];
+	char itemAddr[ADDR_LEN*2+1];
 	char command[MAX_COMMAND_LEN+1];
 	char payload[10];
 	
-	if (!parseMessage(topic, command, item)) {
+	if (!parseMessage(topic, command, itemAddr)) {
 		return;
 	}
 	
@@ -96,6 +98,61 @@ void messageReceived(char* topic, unsigned char* pld, unsigned int pldLength) {
 	memcpy(payload, pld, pldLength);
 	payload[pldLength] = '\0';
 	
+	//check if the command is for this unit
+	if (!strcmp(addressStr, itemAddr)) {
+		return; //not for this unit
+	}
+	
+	executeCommand(command, payload);
+}
+
+void executeCommand(const char* command, const char* payload) {
+	if (strcmp(command, isAutoItem)) {
+		heater.isAuto = getBoolPayload(payload);
+		if (!heater.isAuto) {
+			heater.isOn = false;
+		}
+		eepromWriteItem(IS_AUTO);
+	} else
+	if (strcmp(command, isEnabledItem)) {
+		heater.isEnabled = getBoolPayload(payload);
+		eepromWriteItem(IS_ENABLED);
+	} else
+	if (strcmp(command, isOnItem)) {
+		if (!heater.isAuto) {
+			heater.isOn = getBoolPayload(payload);
+			eepromWriteItem(IS_ON);
+		}
+	} else
+	if (strcmp(command, targetTempItem)) {
+		float temp = strtof(payload, nullptr);
+		heater.setTargetTemperature(temp);
+		eepromWriteItem(TARGET_TEMP);
+	} else
+	if (strcmp(command, hysteresisItem)) {
+		hysteresis = strtof(payload, nullptr);
+		eepromWriteItem(HYSTERESIS);
+	} else
+	if (strcmp(command, temperatureAdjustItem)) {
+		float tempAdjust = strtof(payload, nullptr);
+		heater.setTemperatureAdjust(tempAdjust);
+		eepromWriteItem(TEMP_ADJUST);
+	} else {
+		return;
+	}
+
+}
+
+void eepromWriteItem(uint8_t addr) {
+	
+}
+
+bool getBoolPayload(const char* payload) {
+	if (strcmp(payload, ON)) {
+		return true;
+	} else {
+		return false;
+	}
 }
 
 void mqttConnect() {
@@ -108,7 +165,7 @@ void mqttConnect() {
 }
 
 
-boolean parseMessage(const char* topic, char* command, char* item) {
+bool parseMessage(const char* topic, char* command, char* item) {
 	//find last slash in topic
 	char tempItem[MAX_COMMAND_LEN + ADDR_LEN * 2 + 6 + 1]; //item_xxxxxx_MAX_COMMAND_LEN
 	uint8_t slashPosition = strlen(topic) + 1;
@@ -160,7 +217,7 @@ void setup()
 	digitalWrite(LED, HIGH);
 	pinMode(RELAY, OUTPUT);
 	digitalWrite(RELAY, LOW);
-	
+
 	memcpy(heater.address, address, ADDR_LEN);
 	uint8_t len;
 	heater.getAddressString(addressStr, &len);
