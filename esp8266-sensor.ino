@@ -1,4 +1,6 @@
-#include "eepromAddr.h"
+#include <EEPROMVar.h>
+#include <EEPROMex.h>
+#include <EEPROM.h>
 #include <OneWire.h>
 #include <PubSubClient.h>
 #include <DallasTemperature.h>
@@ -12,6 +14,7 @@
 #include "HeaterItem.h"
 #include "config.h"
 #include "mqtt_interface.h"
+#include "eepromAddr.h"
 
 #define LED			2
 #define ONE_WIRE	5
@@ -82,6 +85,24 @@ void publishMessage(float temperature) {
 	bool result = mqttClient.publish(topic, payload, false);
 }
 
+void publishMessageEepromError(bool state) {
+	if (!mqttClient.connected()) {
+		Serial.println("Disconnected");
+		return;
+	}
+	char topic[100];
+	char payload[4];
+	
+	if (state) {
+		memcpy(payload, "ON", 3);
+	} else {
+		memcpy(payload, "OFF", 4);
+	}
+
+	sprintf(topic, "%s%s", mqttStatusesTopic, eepromErrorItem, );
+	bool result = mqttClient.publish(topic, payload, false);
+}
+
 void messageReceived(char* topic, unsigned char* pld, unsigned int pldLength) {
 	char itemAddr[ADDR_LEN*2+1];
 	char command[MAX_COMMAND_LEN+1];
@@ -144,7 +165,31 @@ void executeCommand(const char* command, const char* payload) {
 }
 
 void eepromWriteItem(uint8_t addr) {
+	bool error = false;
+	switch (addr) {
+		case IS_ENABLED:
+			error = !EEPROM.updateByte(addr, heater.isEnabled);
+			break;
+		case IS_AUTO:
+			error = !EEPROM.updateByte(addr, heater.isAuto);
+			break;
+		case IS_ON:
+			error = !EEPROM.updateByte(addr, heater.isOn);
+			break;
+		case TARGET_TEMP:
+			error = !EEPROM.updateFloat(addr, heater.targetTemperature);
+			break;
+		case TEMP_ADJUST:
+			error = !EEPROM.updateFloat(addr, heater.temperatureAdjust);
+			break;
+		case HYSTERESIS:
+			error = !EEPROM.updateFloat(addr, hysteresis);
+			break;
+	}
 	
+	if (error) {
+		publishMessageEepromError(true));
+	}
 }
 
 bool getBoolPayload(const char* payload) {
