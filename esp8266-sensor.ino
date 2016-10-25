@@ -125,16 +125,16 @@ void executeCommand(const char* command, const char* payload) {
 		}
 	} else
 	if (strcmp(command, targetTempItem)) {
-		float temp = strtof(payload, nullptr);
+		float temp = strtod(payload, nullptr);
 		heater.setTargetTemperature(temp);
 		eepromWriteItem(TARGET_TEMP);
 	} else
 	if (strcmp(command, hysteresisItem)) {
-		hysteresis = strtof(payload, nullptr);
+		hysteresis = strtod(payload, nullptr);
 		eepromWriteItem(HYSTERESIS);
 	} else
 	if (strcmp(command, temperatureAdjustItem)) {
-		float tempAdjust = strtof(payload, nullptr);
+		float tempAdjust = strtod(payload, nullptr);
 		heater.setTemperatureAdjust(tempAdjust);
 		eepromWriteItem(TEMP_ADJUST);
 	} else {
