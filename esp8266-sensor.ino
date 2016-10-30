@@ -1,5 +1,3 @@
-#include <EEPROMVar.h>
-#include <EEPROMex.h>
 #include <EEPROM.h>
 #include <OneWire.h>
 #include <PubSubClient.h>
@@ -72,7 +70,7 @@ void getTemp() {
 
 void publishMessage(float temperature) {
 	if (!mqttClient.connected()) {
-		Serial.println("Disconnected");
+		DebugPrintln("Disconnected");
 		return;
 	}
 	char topic[100];
@@ -87,7 +85,7 @@ void publishMessage(float temperature) {
 
 void publishMessageEepromError(bool state) {
 	if (!mqttClient.connected()) {
-		Serial.println("Disconnected");
+		DebugPrintln("Disconnected");
 		return;
 	}
 	char topic[100];
@@ -99,7 +97,7 @@ void publishMessageEepromError(bool state) {
 		memcpy(payload, "OFF", 4);
 	}
 
-	sprintf(topic, "%s%s", mqttStatusesTopic, eepromErrorItem, );
+	sprintf(topic, "%s%s", mqttStatusesTopic, eepromErrorItem);
 	bool result = mqttClient.publish(topic, payload, false);
 }
 
@@ -133,63 +131,43 @@ void executeCommand(const char* command, const char* payload) {
 		if (!heater.isAuto) {
 			heater.isOn = false;
 		}
-		eepromWriteItem(IS_AUTO);
 	} else
 	if (strcmp(command, isEnabledItem)) {
 		heater.isEnabled = getBoolPayload(payload);
-		eepromWriteItem(IS_ENABLED);
 	} else
 	if (strcmp(command, isOnItem)) {
 		if (!heater.isAuto) {
 			heater.isOn = getBoolPayload(payload);
-			eepromWriteItem(IS_ON);
 		}
 	} else
 	if (strcmp(command, targetTempItem)) {
 		float temp = strtod(payload, nullptr);
 		heater.setTargetTemperature(temp);
-		eepromWriteItem(TARGET_TEMP);
 	} else
 	if (strcmp(command, hysteresisItem)) {
 		hysteresis = strtod(payload, nullptr);
-		eepromWriteItem(HYSTERESIS);
 	} else
 	if (strcmp(command, temperatureAdjustItem)) {
 		float tempAdjust = strtod(payload, nullptr);
 		heater.setTemperatureAdjust(tempAdjust);
-		eepromWriteItem(TEMP_ADJUST);
 	} else {
 		return;
 	}
 
 }
 
-void eepromWriteItem(uint8_t addr) {
-	bool error = false;
-	switch (addr) {
-		case IS_ENABLED:
-			error = !EEPROM.updateByte(addr, heater.isEnabled);
-			break;
-		case IS_AUTO:
-			error = !EEPROM.updateByte(addr, heater.isAuto);
-			break;
-		case IS_ON:
-			error = !EEPROM.updateByte(addr, heater.isOn);
-			break;
-		case TARGET_TEMP:
-			error = !EEPROM.updateFloat(addr, heater.targetTemperature);
-			break;
-		case TEMP_ADJUST:
-			error = !EEPROM.updateFloat(addr, heater.temperatureAdjust);
-			break;
-		case HYSTERESIS:
-			error = !EEPROM.updateFloat(addr, hysteresis);
-			break;
-	}
-	
-	if (error) {
-		publishMessageEepromError(true));
-	}
+void serialize(HeaterItem* item, byte* buffer) {
+	float tmp;
+	*buffer++ = item->isEnabled;
+	*buffer++ = item->isAuto;
+	*buffer++ = item->isOn;
+	tmp = item->getTargetTemperature();
+	memcpy(buffer, &tmp, sizeof tmp);
+	buffer += sizeof tmp;
+	tmp = item->getTemperatureAdjust();
+	memcpy(buffer, &tmp, sizeof tmp);
+	buffer += sizeof tmp;
+	memcpy(buffer, &hysteresis, sizeof hysteresis);
 }
 
 bool getBoolPayload(const char* payload) {
