@@ -170,6 +170,20 @@ void serialize(HeaterItem* item, byte* buffer) {
 	memcpy(buffer, &hysteresis, sizeof hysteresis);
 }
 
+void deserialize(byte* buffer, HeaterItem* item) {
+	float tmp;
+	item->isEnabled = *buffer++;
+	item->isAuto = *buffer++;
+	item->isOn = *buffer++;
+	memcpy(&tmp, buffer, sizeof tmp);
+	buffer += sizeof tmp;
+	item->setTargetTemperature(tmp);
+	memcpy(&tmp, buffer, sizeof tmp);
+	buffer += sizeof tmp;
+	item->setTemperatureAdjust(tmp);
+	memcpy(&hysteresis, buffer, sizeof hysteresis);
+}
+
 bool getBoolPayload(const char* payload) {
 	if (strcmp(payload, ON)) {
 		return true;
