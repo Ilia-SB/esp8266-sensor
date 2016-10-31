@@ -65,6 +65,7 @@
   </armgcc.compiler.symbols.DefSymbols>
   <armgcc.compiler.directories.IncludePaths>
     <ListValues>
+      <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/EEPROM</Value>
       <Value>C:/Users/User/Documents/Arduino/libraries/OneWire</Value>
       <Value>C:/Users/User/Documents/Arduino/libraries/PubSubClient/src</Value>
       <Value>C:/Users/User/Documents/Arduino/libraries/DallasTemperature</Value>
@@ -74,10 +75,7 @@
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WebServer/src</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266mDNS</Value>
       <Value>C:/Users/User/Documents/Arduino/libraries/DallasTemperature/utility</Value>
-      <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/EEPROM</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/EEPROM/utility</Value>
-      <Value>C:/Users/User/Documents/Arduino/libraries/EEPROMEx</Value>
-      <Value>C:/Users/User/Documents/Arduino/libraries/EEPROMEx/utility</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266HTTPUpdateServer/src/utility</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266mDNS/utility</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WebServer/src/utility</Value>
@@ -96,7 +94,7 @@
       <Value>../../../esp8266-sensor</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/tools/sdk/include</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/tools/sdk/lwip/include</Value>
-      <Value>C:/Users/User/AppData/Local/Temp/VMicroBuilds/esp8266-sensor/esp8266_nodemcuv2/core</Value>
+      <Value>{build.path}/core</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2/xtensa-lx106-elf</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include</Value>
@@ -125,6 +123,7 @@
   </armgcccpp.compiler.symbols.DefSymbols>
   <armgcccpp.compiler.directories.IncludePaths>
     <ListValues>
+      <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/EEPROM</Value>
       <Value>C:/Users/User/Documents/Arduino/libraries/OneWire</Value>
       <Value>C:/Users/User/Documents/Arduino/libraries/PubSubClient/src</Value>
       <Value>C:/Users/User/Documents/Arduino/libraries/DallasTemperature</Value>
@@ -134,10 +133,7 @@
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WebServer/src</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266mDNS</Value>
       <Value>C:/Users/User/Documents/Arduino/libraries/DallasTemperature/utility</Value>
-      <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/EEPROM</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/EEPROM/utility</Value>
-      <Value>C:/Users/User/Documents/Arduino/libraries/EEPROMEx</Value>
-      <Value>C:/Users/User/Documents/Arduino/libraries/EEPROMEx/utility</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266HTTPUpdateServer/src/utility</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266mDNS/utility</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WebServer/src/utility</Value>
@@ -156,7 +152,7 @@
       <Value>../../../esp8266-sensor</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/tools/sdk/include</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/tools/sdk/lwip/include</Value>
-      <Value>C:/Users/User/AppData/Local/Temp/VMicroBuilds/esp8266-sensor/esp8266_nodemcuv2/core</Value>
+      <Value>{build.path}/core</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2/xtensa-lx106-elf</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include</Value>
@@ -433,6 +429,7 @@ build.arch=ESP8266
   </armgcc.compiler.symbols.DefSymbols>
   <armgcc.compiler.directories.IncludePaths>
     <ListValues>
+      <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/EEPROM</Value>
       <Value>C:/Users/User/Documents/Arduino/libraries/OneWire</Value>
       <Value>C:/Users/User/Documents/Arduino/libraries/PubSubClient/src</Value>
       <Value>C:/Users/User/Documents/Arduino/libraries/DallasTemperature</Value>
@@ -442,10 +439,7 @@ build.arch=ESP8266
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WebServer/src</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266mDNS</Value>
       <Value>C:/Users/User/Documents/Arduino/libraries/DallasTemperature/utility</Value>
-      <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/EEPROM</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/EEPROM/utility</Value>
-      <Value>C:/Users/User/Documents/Arduino/libraries/EEPROMEx</Value>
-      <Value>C:/Users/User/Documents/Arduino/libraries/EEPROMEx/utility</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266HTTPUpdateServer/src/utility</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266mDNS/utility</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WebServer/src/utility</Value>
@@ -464,7 +458,7 @@ build.arch=ESP8266
       <Value>../../../esp8266-sensor</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/tools/sdk/include</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/tools/sdk/lwip/include</Value>
-      <Value>C:/Users/User/AppData/Local/Temp/VMicroBuilds/esp8266-sensor/esp8266_nodemcuv2/core</Value>
+      <Value>{build.path}/core</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2/xtensa-lx106-elf</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include</Value>
@@ -493,6 +487,7 @@ build.arch=ESP8266
   </armgcccpp.compiler.symbols.DefSymbols>
   <armgcccpp.compiler.directories.IncludePaths>
     <ListValues>
+      <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/EEPROM</Value>
       <Value>C:/Users/User/Documents/Arduino/libraries/OneWire</Value>
       <Value>C:/Users/User/Documents/Arduino/libraries/PubSubClient/src</Value>
       <Value>C:/Users/User/Documents/Arduino/libraries/DallasTemperature</Value>
@@ -502,10 +497,7 @@ build.arch=ESP8266
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WebServer/src</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266mDNS</Value>
       <Value>C:/Users/User/Documents/Arduino/libraries/DallasTemperature/utility</Value>
-      <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/EEPROM</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/EEPROM/utility</Value>
-      <Value>C:/Users/User/Documents/Arduino/libraries/EEPROMEx</Value>
-      <Value>C:/Users/User/Documents/Arduino/libraries/EEPROMEx/utility</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266HTTPUpdateServer/src/utility</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266mDNS/utility</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WebServer/src/utility</Value>
@@ -524,7 +516,7 @@ build.arch=ESP8266
       <Value>../../../esp8266-sensor</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/tools/sdk/include</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/tools/sdk/lwip/include</Value>
-      <Value>C:/Users/User/AppData/Local/Temp/VMicroBuilds/esp8266-sensor/esp8266_nodemcuv2/core</Value>
+      <Value>{build.path}/core</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2/xtensa-lx106-elf</Value>
       <Value>C:/Users/User/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include</Value>

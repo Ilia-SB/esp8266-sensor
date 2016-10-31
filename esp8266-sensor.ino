@@ -267,6 +267,7 @@ void setup()
 
 	ticker.attach_ms(50, blink);
 	
+	WiFi.persistent(false);
 	WiFi.mode(WIFI_AP_STA);
 	WiFi.begin(ssid, password);
 	
