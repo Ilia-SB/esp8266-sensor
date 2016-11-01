@@ -8,6 +8,7 @@
 #include <ESP8266WebServer.h>
 #include <WiFiClient.h>
 #include <ESP8266WiFi.h>
+#include "FS.h"
 #include "debug_print.h"
 #include "HeaterItem.h"
 #include "config.h"
@@ -17,6 +18,10 @@
 #define LED			2
 #define ONE_WIRE	5
 #define RELAY		4
+
+File configFile;
+#define CONFIG_BUFFER_LEN 15
+uint8_t configBuffer[CONFIG_BUFFER_LEN];
 
 OneWire oneWire(ONE_WIRE);
 DallasTemperature sensor(&oneWire);
@@ -156,7 +161,7 @@ void executeCommand(const char* command, const char* payload) {
 
 }
 
-void serialize(HeaterItem* item, byte* buffer) {
+void serialize(HeaterItem* item, uint8_t* buffer) {
 	float tmp;
 	*buffer++ = item->isEnabled;
 	*buffer++ = item->isAuto;
@@ -170,7 +175,7 @@ void serialize(HeaterItem* item, byte* buffer) {
 	memcpy(buffer, &hysteresis, sizeof hysteresis);
 }
 
-void deserialize(byte* buffer, HeaterItem* item) {
+void deserialize(uint8_t* buffer, HeaterItem* item) {
 	float tmp;
 	item->isEnabled = *buffer++;
 	item->isAuto = *buffer++;
@@ -248,6 +253,60 @@ bool parseMessage(const char* topic, char* command, char* item) {
 	return true;
 }
 
+void loadConfig() {
+	configFile = SPIFFS.open("/cfg", "r");
+	if (!configFile) {
+		DebugPrintln("Config file missing. Creating");
+		createConfigFile();
+	}
+	configFile.readBytes((char*)configBuffer, CONFIG_BUFFER_LEN);
+	configFile.close();
+	deserialize(configBuffer, &heater);
+	
+	#ifdef DEBUG
+		char tempadj[7], targettemp[7], hyst[7];
+		dtostrf(heater.getTemperatureAdjust(), 6, 2, tempadj);
+		dtostrf(heater.getTargetTemperature(), 6, 2, targettemp);
+		dtostrf(hysteresis, 6, 2, hyst);
+		DebugPrintln("Loaded config:");
+		DebugPrint("isEnabled: "); DebugPrintln(heater.isEnabled);
+		DebugPrint("isAuto: "); DebugPrintln(heater.isAuto);
+		DebugPrint("isOn: "); DebugPrintln(heater.isOn);
+		DebugPrintf("targetTemp: %s\n", targettemp);
+		DebugPrintf("tempAdjust: %s\n", tempadj);
+		DebugPrintf("hysteresis: %s\n", hyst);
+	#endif
+}
+
+void createConfigFile() {
+	heater.isEnabled = false;
+	heater.isOn = false;
+	heater.isAuto = false;
+	heater.setTargetTemperature(5);
+	heater.setTemperatureAdjust(0);
+	hysteresis = 1;
+	
+	serialize(&heater, configBuffer);
+	saveConfig(configBuffer, CONFIG_BUFFER_LEN);
+}
+
+void saveConfig(uint8_t* buffer, size_t len) {
+	configFile = SPIFFS.open("/cfg", "w");
+	if (!configFile) {
+		DebugPrintln("Config file creation failed.");
+		return;
+	} else {
+		uint8_t written = configFile.write(buffer, len);
+		if (written == len) {
+			DebugPrintln("Done.");
+		} else {
+			DebugPrintln("Writing config failed.");
+		}
+		DebugPrintf("Written %d bytes.", written);
+		configFile.close();
+	}
+}
+
 void setup()
 {
 	pinMode(LED, OUTPUT);
@@ -264,7 +323,20 @@ void setup()
 	#endif
 	DebugPrintln();
 	DebugPrintln("Starting...");
-
+	
+	FSInfo fsInfo;
+	SPIFFS.begin();
+	if (!SPIFFS.info(fsInfo)) {
+		DebugPrintln("File system not formatted. Formatting...");
+		if (SPIFFS.format()) {
+			DebugPrintln("Done.");
+		} else {
+			DebugPrintln("Failed.");
+		}
+	}
+	
+	loadConfig();
+	
 	ticker.attach_ms(50, blink);
 	
 	WiFi.persistent(false);
