@@ -19,8 +19,11 @@
 #define ONE_WIRE	5
 #define RELAY		4
 
+static PROGMEM prog_uint32_t crc_table[16] = {0x00000000, 0x1db71064, 0x3b6e20c8, 0x26d930ac, 0x76dc4190, 0x6b6b51f4, 0x4db26158, 0x5005713c,
+	0xedb88320, 0xf00f9344, 0xd6d6a3e8, 0xcb61b38c, 0x9b64c2b0, 0x86d3d2d4, 0xa00ae278, 0xbdbdf21c};
+
 File configFile;
-#define CONFIG_BUFFER_LEN 15
+#define CONFIG_BUFFER_LEN 19
 uint8_t configBuffer[CONFIG_BUFFER_LEN+1];
 
 OneWire oneWire(ONE_WIRE);
@@ -30,6 +33,7 @@ float temp;
 float hysteresis;
 
 bool flagProcessHeater = false;
+bool flagSetEepromError = false, flagClearEepromError = false;
 
 #define ADDR_LEN 3
 const byte address[ADDR_LEN] = {0x00,0x00,0x0D};
@@ -199,8 +203,9 @@ void configSaverWorker() {
 	configSaver.detach();
 }
 
-void serialize(HeaterItem* item, uint8_t* buffer) {
+uint8_t serialize(HeaterItem* item, uint8_t* buffer) {
 	float tmp;
+	uint8_t* start = buffer;
 	*buffer++ = item->isEnabled;
 	*buffer++ = item->isAuto;
 	*buffer++ = item->isOn;
@@ -211,6 +216,8 @@ void serialize(HeaterItem* item, uint8_t* buffer) {
 	memcpy(buffer, &tmp, sizeof tmp);
 	buffer += sizeof tmp;
 	memcpy(buffer, &hysteresis, sizeof hysteresis);
+	buffer += sizeof hysteresis;
+	return buffer - start;
 }
 
 void deserialize(uint8_t* buffer, HeaterItem* item) {
@@ -301,8 +308,17 @@ void loadConfig() {
 		DebugPrint(configBuffer[i]);DebugPrint(" ");
 	}
 	DebugPrintln(" ");
-	deserialize(configBuffer, &heater);
-	
+	unsigned long loaded_crc;
+	memcpy(&loaded_crc, configBuffer + CONFIG_BUFFER_LEN - sizeof loaded_crc, sizeof loaded_crc);
+	unsigned long crc = crc_byte(configBuffer, CONFIG_BUFFER_LEN - sizeof crc);
+	if (loaded_crc == crc) {
+		deserialize(configBuffer, &heater);
+		flagClearEepromError = true;
+	} else {
+		DebugPrintln("CRC error loading config");
+		flagSetEepromError = true;
+		createConfigFile();
+	}
 	#ifdef DEBUG
 		char tempadj[7], targettemp[7], hyst[7];
 		dtostrf(heater.getTemperatureAdjust(), 6, 2, tempadj);
@@ -321,18 +337,20 @@ void loadConfig() {
 }
 
 void createConfigFile() {
-	heater.isEnabled = false;
+	heater.isEnabled = true;
 	heater.isOn = false;
-	heater.isAuto = false;
+	heater.isAuto = true;
 	heater.setTargetTemperature(5);
 	heater.setTemperatureAdjust(0);
-	hysteresis = 1;
+	hysteresis = 3;
 	
 	saveConfig(&heater, CONFIG_BUFFER_LEN);
 }
 
 void saveConfig(HeaterItem* item, size_t len) {
-	serialize(item, configBuffer);
+	uint8_t dataLen = serialize(item, configBuffer);
+	unsigned long crc = crc_byte(configBuffer, dataLen);
+	memcpy(configBuffer + dataLen, &crc, sizeof crc);
 	configBuffer[CONFIG_BUFFER_LEN] = '\0';
 	DebugPrintln("Saving config.");
 	for(int i=0; i<CONFIG_BUFFER_LEN;i++) {
@@ -353,6 +371,29 @@ void saveConfig(HeaterItem* item, size_t len) {
 		DebugPrintf("Written %d bytes.", written);
 		configFile.close();
 	}
+}
+
+unsigned long crc_update(unsigned long crc, byte data)
+{
+	byte tbl_idx;
+	tbl_idx = crc ^ (data >> (0 * 4));
+	crc = pgm_read_dword_near(crc_table + (tbl_idx & 0x0f)) ^ (crc >> 4);
+	tbl_idx = crc ^ (data >> (1 * 4));
+	crc = pgm_read_dword_near(crc_table + (tbl_idx & 0x0f)) ^ (crc >> 4);
+	return crc;
+}
+
+unsigned long crc_byte(byte *b, int len)
+{
+	unsigned long crc = ~0L;
+	uint8_t i;
+
+	for (i = 0 ; i < len ; i++)
+	{
+		crc = crc_update(crc, *b++);
+	}
+	crc = ~crc;
+	return crc;
 }
 
 void setup()
@@ -437,6 +478,16 @@ void loop()
 	}
 	
 	mqttClient.loop();
+	
+	if (flagSetEepromError) {
+		flagSetEepromError = false;
+		publishMessageB(eepromErrorItem, addressStr, true, true);
+	}
+	
+	if (flagClearEepromError) {
+		flagClearEepromError = false;
+		publishMessageB(eepromErrorItem, addressStr, false, true);
+	}
 	
 	if (flagProcessHeater) {
 		flagProcessHeater = false;
