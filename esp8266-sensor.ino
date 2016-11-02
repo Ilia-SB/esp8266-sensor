@@ -74,7 +74,7 @@ void getTemp() {
 	ticker.attach(30, requestTemp);
 }
 
-void publishMessageF(const char* item, const char* addr, float value) {
+void publishMessageF(const char* item, const char* addr, float value, bool persist) {
 	if (!mqttClient.connected()) {
 		DebugPrintln("Disconnected");
 		mqttConnect();
@@ -83,17 +83,29 @@ void publishMessageF(const char* item, const char* addr, float value) {
 	char payload[10];
 	sprintf(topic, "%sitem_%s_%s", mqttStatusesTopic, addr, item);
 	dtostrf(value, 6, 2, payload);
-	mqttClient.publish(topic, payload, false);
+	mqttClient.publish(topic, payload, persist);
 }
 
-void publishMessageB(const char* item, const char* addr, bool state) {
+void publishMessageI(const char* item, const char* addr, int value, bool persist) {
+	if (!mqttClient.connected()) {
+		DebugPrintln("Disconnected");
+		mqttConnect();
+	}
+	char topic[100];
+	char payload[10];
+	sprintf(topic, "%sitem_%s_%s", mqttStatusesTopic, addr, item);
+	sprintf(payload, "%d", value);
+	mqttClient.publish(topic, payload, persist);
+}
+
+void publishMessageB(const char* item, const char* addr, bool state, bool persist) {
 	if (!mqttClient.connected()) {
 		DebugPrintln("Disconnected");
 		mqttConnect();
 	}
 	char topic[100];
 	char payload[4];
-	//sprintf(topic, "%sitem_%s_%s", mqttStatusesTopic, addr, item);
+	sprintf(topic, "%sitem_%s_%s", mqttStatusesTopic, addr, item);
 	
 	if (state) {
 		memcpy(payload, "ON", 3);
@@ -101,7 +113,7 @@ void publishMessageB(const char* item, const char* addr, bool state) {
 		memcpy(payload, "OFF", 4);
 	}
 
-	mqttClient.publish(topic, payload, false);
+	mqttClient.publish(topic, payload, persist);
 }
 
 void messageReceived(char* topic, unsigned char* pld, unsigned int pldLength) {
@@ -134,30 +146,37 @@ void executeCommand(const char* command, const char* payload) {
 		if (!heater.isAuto) {
 			heater.isOn = false;
 		}
+		publishMessageB(isAutoItem, addressStr, heater.isAuto, true);
+		publishMessageB(isOnItem, addressStr, heater.isOn, false);
 	} else
 	if (!strcmp(command, isEnabledItem)) {
 		DebugPrintln("isEnabled");
 		heater.isEnabled = getBoolPayload(payload);
+		publishMessageB(isEnabledItem, addressStr, heater.isEnabled, true);
 	} else
 	if (!strcmp(command, isOnItem)) {
 		DebugPrintln("isOn");
 		if (!heater.isAuto) {
 			heater.isOn = getBoolPayload(payload);
 		}
+		publishMessageB(isOnItem, addressStr, heater.isOn, false);
 	} else
 	if (!strcmp(command, targetTempItem)) {
 		DebugPrintln("setTargetTemp");
 		float temp = strtod(payload, nullptr);
 		heater.setTargetTemperature(temp);
+		publishMessageI(targetTempItem, addressStr, (int)heater.getTargetTemperature(), true);
 	} else
 	if (!strcmp(command, hysteresisItem)) {
 		DebugPrintln("setHysteresis");
 		hysteresis = strtod(payload, nullptr);
+		publishMessageF(hysteresisItem, addressStr, hysteresis, true);
 	} else
 	if (!strcmp(command, temperatureAdjustItem)) {
 		DebugPrintln("setTempAdjust");
 		float tempAdjust = strtod(payload, nullptr);
 		heater.setTemperatureAdjust(tempAdjust);
+		publishMessageF(temperatureAdjustItem, addressStr, heater.getTemperatureAdjust(), true);
 	} else {
 		DebugPrintln("Unknown");
 		return;
@@ -386,6 +405,13 @@ void setup()
 	mqttClient.setCallback(messageReceived);
 	mqttConnect();
 	
+	publishMessageF(temperatureAdjustItem, addressStr, heater.getTemperatureAdjust(), true);
+	publishMessageI(targetTempItem, addressStr, (int)heater.getTargetTemperature(), true);
+	publishMessageF(hysteresisItem, addressStr, hysteresis, true);
+	publishMessageB(isEnabledItem, addressStr, heater.isEnabled, true);
+	publishMessageB(isAutoItem, addressStr, heater.isAuto, true);
+	//publishMessageB(isOnItem, addressStr, heater.isOn, true);
+	
 	sensor.begin();
 	sensor.setResolution(12);
 	
@@ -408,7 +434,7 @@ void loop()
 	if (flagReportTemp) {
 		flagReportTemp = false;
 		
-		publishMessageF(tempItem, addressStr, heater.getTemperature());
-		publishMessageB(isOnItem, addressStr, heater.isOn);
+		publishMessageF(tempItem, addressStr, heater.getTemperature(), false);
+		publishMessageB(isOnItem, addressStr, heater.isOn, false);
 	}
 }
