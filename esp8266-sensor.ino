@@ -29,7 +29,7 @@ DallasTemperature sensor(&oneWire);
 float temp;
 float hysteresis;
 
-bool flagReportTemp = false;
+bool flagProcessHeater = false;
 
 #define ADDR_LEN 3
 const byte address[ADDR_LEN] = {0x00,0x00,0x0D};
@@ -70,7 +70,7 @@ void getTemp() {
 	sensor.getAddress(addr, 0);
 	heater.setTemperature(sensor.getTempC(addr));
 	DebugPrintln(heater.getTemperature());
-	flagReportTemp = true;
+	flagProcessHeater = true;
 	ticker.attach(30, requestTemp);
 }
 
@@ -152,7 +152,13 @@ void executeCommand(const char* command, const char* payload) {
 	if (!strcmp(command, isEnabledItem)) {
 		DebugPrintln("isEnabled");
 		heater.isEnabled = getBoolPayload(payload);
+		if (!heater.isEnabled) {
+			heater.isAuto = false;
+			heater.isOn = false;
+		}
 		publishMessageB(isEnabledItem, addressStr, heater.isEnabled, true);
+		publishMessageB(isAutoItem, addressStr, heater.isAuto, true);
+		publishMessageB(isOnItem, addressStr, heater.isOn, false);
 	} else
 	if (!strcmp(command, isOnItem)) {
 		DebugPrintln("isOn");
@@ -185,6 +191,7 @@ void executeCommand(const char* command, const char* payload) {
 	
 	configSaver.detach();
 	configSaver.attach(5, configSaverWorker);
+	flagProcessHeater = true;
 }
 
 void configSaverWorker() {
@@ -431,10 +438,32 @@ void loop()
 	
 	mqttClient.loop();
 	
-	if (flagReportTemp) {
-		flagReportTemp = false;
+	if (flagProcessHeater) {
+		flagProcessHeater = false;
 		
-		publishMessageF(tempItem, addressStr, heater.getTemperature(), false);
-		publishMessageB(isOnItem, addressStr, heater.isOn, false);
+		if (heater.isEnabled) {
+			
+			//AUTO MODE
+			if (heater.isAuto) {
+				if (heater.getTemperature() > heater.getTargetTemperature() + hysteresis) {
+					digitalWrite(RELAY, LOW);
+					heater.isOn = false;
+				}
+				if (heater.getTemperature() < heater.getTargetTemperature()) {
+					digitalWrite(RELAY, HIGH);
+					heater.isOn = true;
+				}
+			} else {
+			
+			//MANUAL MODE
+				if (heater.isOn) {
+					digitalWrite(RELAY, HIGH);
+				} else {
+					digitalWrite(RELAY, LOW);
+				}
+			}
+			publishMessageF(tempItem, addressStr, heater.getTemperature(), false);
+			publishMessageB(isOnItem, addressStr, heater.isOn, false);
+		}
 	}
 }
