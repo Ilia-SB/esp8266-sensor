@@ -3,8 +3,8 @@
 #ifndef _MQTT_INTERFACE_h
 #define _MQTT_INTERFACE_h
 
-const char* mqttStatusesTopic = "/ehome/heating/statuses/";
-const char* mqttCommandsTopic = "/ehome/heating/commands/";
+const char* mqttStatusesTopic = "ehome/heating/statuses/";
+const char* mqttCommandsTopic = "ehome/heating/commands/#";
 
 const char* tempItem = "temp";
 const char* isAutoItem = "isauto";

@@ -21,7 +21,7 @@
 
 File configFile;
 #define CONFIG_BUFFER_LEN 15
-uint8_t configBuffer[CONFIG_BUFFER_LEN];
+uint8_t configBuffer[CONFIG_BUFFER_LEN+1];
 
 OneWire oneWire(ONE_WIRE);
 DallasTemperature sensor(&oneWire);
@@ -32,7 +32,7 @@ float hysteresis;
 bool flagReportTemp = false;
 
 #define ADDR_LEN 3
-const byte address[ADDR_LEN] = {0x00,0x00,0x0E};
+const byte address[ADDR_LEN] = {0x00,0x00,0x0D};
 char addressStr[ADDR_LEN * 2 + 1];
 
 #define MAX_COMMAND_LEN 15
@@ -46,6 +46,7 @@ WiFiClient wifiClient;
 PubSubClient mqttClient;
 
 Ticker ticker;
+Ticker configSaver;
 
 void blink(void);
 void requestTemp(void);
@@ -67,34 +68,32 @@ void getTemp() {
 	digitalWrite(LED, HIGH);
 	uint8_t addr[8];
 	sensor.getAddress(addr, 0);
-	temp = sensor.getTempC(addr);
-	DebugPrintln(temp);
+	heater.setTemperature(sensor.getTempC(addr));
+	DebugPrintln(heater.getTemperature());
 	flagReportTemp = true;
 	ticker.attach(30, requestTemp);
 }
 
-void publishMessage(float temperature) {
+void publishMessageF(const char* item, const char* addr, float value) {
 	if (!mqttClient.connected()) {
 		DebugPrintln("Disconnected");
-		return;
+		mqttConnect();
 	}
 	char topic[100];
 	char payload[10];
-	char addr[ADDR_LEN*2 + 1];
-	uint8_t len = 0;
-	heater.getAddressString(addr, &len);
-	sprintf(topic, "%sitem_%s_%s", mqttStatusesTopic, addr, tempItem);
-	dtostrf(temperature, 6, 2, payload);
-	bool result = mqttClient.publish(topic, payload, false);
+	sprintf(topic, "%sitem_%s_%s", mqttStatusesTopic, addr, item);
+	dtostrf(value, 6, 2, payload);
+	mqttClient.publish(topic, payload, false);
 }
 
-void publishMessageEepromError(bool state) {
+void publishMessageB(const char* item, const char* addr, bool state) {
 	if (!mqttClient.connected()) {
 		DebugPrintln("Disconnected");
-		return;
+		mqttConnect();
 	}
 	char topic[100];
 	char payload[4];
+	//sprintf(topic, "%sitem_%s_%s", mqttStatusesTopic, addr, item);
 	
 	if (state) {
 		memcpy(payload, "ON", 3);
@@ -102,8 +101,7 @@ void publishMessageEepromError(bool state) {
 		memcpy(payload, "OFF", 4);
 	}
 
-	sprintf(topic, "%s%s", mqttStatusesTopic, eepromErrorItem);
-	bool result = mqttClient.publish(topic, payload, false);
+	mqttClient.publish(topic, payload, false);
 }
 
 void messageReceived(char* topic, unsigned char* pld, unsigned int pldLength) {
@@ -114,51 +112,65 @@ void messageReceived(char* topic, unsigned char* pld, unsigned int pldLength) {
 	if (!parseMessage(topic, command, itemAddr)) {
 		return;
 	}
-	
-	//check if command is for this module
-	//if (!)
+
+	//check if the command is for this unit
+	if (strcmp(addressStr, itemAddr)) {
+		return; //not for this unit
+	}
 	
 	//populate payload
 	memcpy(payload, pld, pldLength);
-	payload[pldLength] = '\0';
-	
-	//check if the command is for this unit
-	if (!strcmp(addressStr, itemAddr)) {
-		return; //not for this unit
-	}
+	payload[pldLength] = '\0';	
 	
 	executeCommand(command, payload);
 }
 
 void executeCommand(const char* command, const char* payload) {
-	if (strcmp(command, isAutoItem)) {
+	DebugPrintf("executeCommand(): %s | %s\n", command, payload);
+	if (!strcmp(command, isAutoItem)) {
+		DebugPrintln("isAuto");
 		heater.isAuto = getBoolPayload(payload);
+
 		if (!heater.isAuto) {
 			heater.isOn = false;
 		}
 	} else
-	if (strcmp(command, isEnabledItem)) {
+	if (!strcmp(command, isEnabledItem)) {
+		DebugPrintln("isEnabled");
 		heater.isEnabled = getBoolPayload(payload);
 	} else
-	if (strcmp(command, isOnItem)) {
+	if (!strcmp(command, isOnItem)) {
+		DebugPrintln("isOn");
 		if (!heater.isAuto) {
 			heater.isOn = getBoolPayload(payload);
 		}
 	} else
-	if (strcmp(command, targetTempItem)) {
+	if (!strcmp(command, targetTempItem)) {
+		DebugPrintln("setTargetTemp");
 		float temp = strtod(payload, nullptr);
 		heater.setTargetTemperature(temp);
 	} else
-	if (strcmp(command, hysteresisItem)) {
+	if (!strcmp(command, hysteresisItem)) {
+		DebugPrintln("setHysteresis");
 		hysteresis = strtod(payload, nullptr);
 	} else
-	if (strcmp(command, temperatureAdjustItem)) {
+	if (!strcmp(command, temperatureAdjustItem)) {
+		DebugPrintln("setTempAdjust");
 		float tempAdjust = strtod(payload, nullptr);
 		heater.setTemperatureAdjust(tempAdjust);
 	} else {
+		DebugPrintln("Unknown");
 		return;
 	}
+	
+	
+	configSaver.detach();
+	configSaver.attach(5, configSaverWorker);
+}
 
+void configSaverWorker() {
+	saveConfig(&heater, CONFIG_BUFFER_LEN);
+	configSaver.detach();
 }
 
 void serialize(HeaterItem* item, uint8_t* buffer) {
@@ -190,7 +202,7 @@ void deserialize(uint8_t* buffer, HeaterItem* item) {
 }
 
 bool getBoolPayload(const char* payload) {
-	if (strcmp(payload, ON)) {
+	if (!strcmp(payload, ON)) {
 		return true;
 	} else {
 		return false;
@@ -217,18 +229,16 @@ bool parseMessage(const char* topic, char* command, char* item) {
 			break;
 		} 
 	}
-	
 	if (slashPosition == strlen(topic) + 1) {
 		return false;
 	}
 	
 	//copy everything after slash to tempItem
 	memcpy(tempItem, topic + slashPosition + 1, strlen(topic) - slashPosition);
-
 	//find underscores
 	uint8_t _positions[MAX_COMMAND_LEN];
 	uint8_t _found = 0;
-	for (uint8_t i=strlen(tempItem)-1;i++>0;) {
+	for (uint8_t i=strlen(tempItem)-1;i-->0;) {
 		if(tempItem[i] == '_') {
 			_positions[_found] = i;
 			_found++;
@@ -241,19 +251,19 @@ bool parseMessage(const char* topic, char* command, char* item) {
 	if (_found != 2) {
 		return false;
 	}
-		
+	
 	//copy command and item to corresponding buffers
-	uint8_t commandLen = strlen(targetTempItem) - _positions[0];
-	memcpy(command, topic + _positions[0] + 1, commandLen);
+	uint8_t commandLen = strlen(tempItem) - _positions[0];
+	memcpy(command, tempItem + _positions[0] + 1, commandLen);
 	command[commandLen] = '\0';
 	uint8_t itemLen = _positions[0] - _positions[1] - 1;
-	memcpy(item, topic + _positions[1] + 1, itemLen);
+	memcpy(item, tempItem + _positions[1] + 1, itemLen);
 	item[itemLen] = '\0';
-	
 	return true;
 }
 
 void loadConfig() {
+	DebugPrintln("Loading config");
 	configFile = SPIFFS.open("/cfg", "r");
 	if (!configFile) {
 		DebugPrintln("Config file missing. Creating");
@@ -261,6 +271,10 @@ void loadConfig() {
 	}
 	configFile.readBytes((char*)configBuffer, CONFIG_BUFFER_LEN);
 	configFile.close();
+	for(int i=0; i<CONFIG_BUFFER_LEN;i++) {
+		DebugPrint(configBuffer[i]);DebugPrint(" ");
+	}
+	DebugPrintln(" ");
 	deserialize(configBuffer, &heater);
 	
 	#ifdef DEBUG
@@ -276,6 +290,8 @@ void loadConfig() {
 		DebugPrintf("tempAdjust: %s\n", tempadj);
 		DebugPrintf("hysteresis: %s\n", hyst);
 	#endif
+	
+	//TODO: crc and eeprom error reporting
 }
 
 void createConfigFile() {
@@ -286,17 +302,23 @@ void createConfigFile() {
 	heater.setTemperatureAdjust(0);
 	hysteresis = 1;
 	
-	serialize(&heater, configBuffer);
-	saveConfig(configBuffer, CONFIG_BUFFER_LEN);
+	saveConfig(&heater, CONFIG_BUFFER_LEN);
 }
 
-void saveConfig(uint8_t* buffer, size_t len) {
+void saveConfig(HeaterItem* item, size_t len) {
+	serialize(item, configBuffer);
+	configBuffer[CONFIG_BUFFER_LEN] = '\0';
+	DebugPrintln("Saving config.");
+	for(int i=0; i<CONFIG_BUFFER_LEN;i++) {
+		DebugPrint(configBuffer[i]);DebugPrint(" ");
+	}
+	DebugPrintln(" ");
 	configFile = SPIFFS.open("/cfg", "w");
 	if (!configFile) {
 		DebugPrintln("Config file creation failed.");
 		return;
 	} else {
-		uint8_t written = configFile.write(buffer, len);
+		uint8_t written = configFile.write(configBuffer, len);
 		if (written == len) {
 			DebugPrintln("Done.");
 		} else {
@@ -323,7 +345,7 @@ void setup()
 	#endif
 	DebugPrintln();
 	DebugPrintln("Starting...");
-	
+	DebugPrintf("This unit's address is: %s\n", addressStr);	
 	FSInfo fsInfo;
 	SPIFFS.begin();
 	if (!SPIFFS.info(fsInfo)) {
@@ -385,6 +407,8 @@ void loop()
 	
 	if (flagReportTemp) {
 		flagReportTemp = false;
-		publishMessage(temp);
+		
+		publishMessageF(tempItem, addressStr, heater.getTemperature());
+		publishMessageB(isOnItem, addressStr, heater.isOn);
 	}
 }
