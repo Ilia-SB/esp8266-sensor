@@ -36,7 +36,7 @@ bool flagProcessHeater = false;
 bool flagSetEepromError = false, flagClearEepromError = false;
 
 #define ADDR_LEN 3
-const byte address[ADDR_LEN] = {0x00,0x00,0x0D};
+const byte address[ADDR_LEN] = {0x00,0x00,0x0E};
 char addressStr[ADDR_LEN * 2 + 1];
 
 #define MAX_COMMAND_LEN 15
@@ -86,7 +86,20 @@ void publishMessageF(const char* item, const char* addr, float value, bool persi
 	char topic[100];
 	char payload[10];
 	sprintf(topic, "%sitem_%s_%s", mqttStatusesTopic, addr, item);
-	dtostrf(value, 6, 2, payload);
+	if (value < 0) {
+		if (value >= -10) {
+			dtostrf(value, 5, 2, payload);			
+		} else {
+			dtostrf(value, 6, 2, payload);
+		}
+	} else {
+		if (value < 10) {
+			dtostrf(value, 4, 2, payload);	
+		} else {
+				dtostrf(value, 5, 2, payload);
+		}
+	}
+
 	mqttClient.publish(topic, payload, persist);
 }
 

@@ -61,6 +61,7 @@
       <Value>LWIP_OPEN_SRC</Value>
       <Value>ARDUINO_ESP8266_NODEMCU</Value>
       <Value>ARDUINO_ARCH_ESP8266</Value>
+      <Value>DEBUG</Value>
     </ListValues>
   </armgcc.compiler.symbols.DefSymbols>
   <armgcc.compiler.directories.IncludePaths>
@@ -119,6 +120,7 @@
       <Value>LWIP_OPEN_SRC</Value>
       <Value>ARDUINO_ESP8266_NODEMCU</Value>
       <Value>ARDUINO_ARCH_ESP8266</Value>
+      <Value>DEBUG</Value>
     </ListValues>
   </armgcccpp.compiler.symbols.DefSymbols>
   <armgcccpp.compiler.directories.IncludePaths>
@@ -174,6 +176,7 @@
     </ListValues>
   </armgcccpp.linker.libraries.LibrarySearchPaths>
   <armgcccpp.linker.optimization.GarbageCollectUnusedSections>True</armgcccpp.linker.optimization.GarbageCollectUnusedSections>
+  <armgcccpp.linker.memorysettings.ExternalRAM />
   <armgcccpp.linker.miscellaneous.LinkerFlags>-Tsamd21e18a_flash.ld</armgcccpp.linker.miscellaneous.LinkerFlags>
   <armgcccpp.assembler.debugging.DebugLevel>Default (-g)</armgcccpp.assembler.debugging.DebugLevel>
   <armgcccpp.preprocessingassembler.general.IncludePaths>
@@ -425,6 +428,7 @@ build.arch=ESP8266
       <Value>LWIP_OPEN_SRC</Value>
       <Value>ARDUINO_ESP8266_NODEMCU</Value>
       <Value>ARDUINO_ARCH_ESP8266</Value>
+      <Value>DEBUG</Value>
     </ListValues>
   </armgcc.compiler.symbols.DefSymbols>
   <armgcc.compiler.directories.IncludePaths>
@@ -483,6 +487,7 @@ build.arch=ESP8266
       <Value>LWIP_OPEN_SRC</Value>
       <Value>ARDUINO_ESP8266_NODEMCU</Value>
       <Value>ARDUINO_ARCH_ESP8266</Value>
+      <Value>DEBUG</Value>
     </ListValues>
   </armgcccpp.compiler.symbols.DefSymbols>
   <armgcccpp.compiler.directories.IncludePaths>
@@ -538,6 +543,7 @@ build.arch=ESP8266
     </ListValues>
   </armgcccpp.linker.libraries.LibrarySearchPaths>
   <armgcccpp.linker.optimization.GarbageCollectUnusedSections>True</armgcccpp.linker.optimization.GarbageCollectUnusedSections>
+  <armgcccpp.linker.memorysettings.ExternalRAM />
   <armgcccpp.linker.miscellaneous.LinkerFlags>-Tsamd21e18a_flash.ld</armgcccpp.linker.miscellaneous.LinkerFlags>
   <armgcccpp.assembler.debugging.DebugLevel>Default (-g)</armgcccpp.assembler.debugging.DebugLevel>
   <armgcccpp.preprocessingassembler.general.IncludePaths>
