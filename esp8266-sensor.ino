@@ -34,6 +34,10 @@ float hysteresis;
 
 bool flagProcessHeater = false;
 bool flagSetEepromError = false, flagClearEepromError = false;
+bool flagWifiConnected = false, flagWifiIsConnecting = false;
+bool flagNetworkServicesInitialized = false;
+bool flagMqttIsConnected = false, flagMqttIsConnecting = false;
+bool flagMqttTryConnect = false;
 
 #define ADDR_LEN 3
 const byte address[ADDR_LEN] = {0x00,0x00,0x0E};
@@ -46,11 +50,14 @@ ESP8266HTTPUpdateServer httpUpdater;
 
 HeaterItem heater;
 
+WiFiEventHandler wifiConnectHandler, wifiDisconnectHandler;
 WiFiClient wifiClient;
 PubSubClient mqttClient;
 
+Ticker blinker;
 Ticker ticker;
 Ticker configSaver;
+Ticker mqttConnector;
 
 void blink(void);
 void requestTemp(void);
@@ -80,8 +87,8 @@ void getTemp() {
 
 void publishMessageF(const char* item, const char* addr, float value, bool persist) {
 	if (!mqttClient.connected()) {
-		DebugPrintln("Disconnected");
-		mqttConnect();
+		DebugPrintln("Mqtt not connected.");
+		return;
 	}
 	char topic[100];
 	char payload[10];
@@ -105,8 +112,8 @@ void publishMessageF(const char* item, const char* addr, float value, bool persi
 
 void publishMessageI(const char* item, const char* addr, int value, bool persist) {
 	if (!mqttClient.connected()) {
-		DebugPrintln("Disconnected");
-		mqttConnect();
+		DebugPrintln("Mqtt not connected.");
+		return;
 	}
 	char topic[100];
 	char payload[10];
@@ -117,8 +124,8 @@ void publishMessageI(const char* item, const char* addr, int value, bool persist
 
 void publishMessageB(const char* item, const char* addr, bool state, bool persist) {
 	if (!mqttClient.connected()) {
-		DebugPrintln("Disconnected");
-		mqttConnect();
+		DebugPrintln("Mqtt not connected.");
+		return;
 	}
 	char topic[100];
 	char payload[4];
@@ -256,12 +263,11 @@ bool getBoolPayload(const char* payload) {
 }
 
 void mqttConnect() {
-	DebugPrintln("Connecting to mqtt server");
-	while (!mqttClient.connect(addressStr)) {
-		DebugPrint(".");
-		delay(1000);
+	if (!mqttClient.connected() && flagWifiConnected) {
+		DebugPrintln("Connecting to mqtt server");
+		flagMqttTryConnect = true;
+		//mqttClient.connect(addressStr);
 	}
-	mqttClient.subscribe(mqttCommandsTopic);
 }
 
 
@@ -409,6 +415,21 @@ unsigned long crc_byte(byte *b, int len)
 	return crc;
 }
 
+void onWIFIConnected(const WiFiEventStationModeGotIP& event) {
+	DebugPrintln("WIFI connection event");
+	flagWifiConnected = true;
+	flagWifiIsConnecting = false;
+}
+
+void onWIFIDisconnected(const WiFiEventStationModeDisconnected& event) {
+	DebugPrintln("WIFI disconnection event");
+	flagWifiConnected = false;
+	flagNetworkServicesInitialized = false;
+	flagMqttIsConnected = false;
+	flagMqttIsConnecting = false;
+	blinker.attach_ms(50, blink);
+}
+
 void setup()
 {
 	pinMode(LED, OUTPUT);
@@ -439,67 +460,98 @@ void setup()
 	
 	loadConfig();
 	
-	ticker.attach_ms(50, blink);
-	
 	WiFi.persistent(false);
+	wifiConnectHandler = WiFi.onStationModeGotIP(&onWIFIConnected);
+	wifiDisconnectHandler = WiFi.onStationModeDisconnected(&onWIFIDisconnected);
 	WiFi.mode(WIFI_AP_STA);
-	WiFi.begin(ssid, password);
-	
-	while(WiFi.waitForConnectResult() != WL_CONNECTED){
-	  WiFi.begin(ssid, password);
-	  DebugPrintln("WiFi failed, retrying.");
-	}
-	
-	ticker.detach();
-	ticker.attach_ms(100, blink);
-	
-	MDNS.begin(host);
-	
-	httpUpdater.setup(&httpServer, update_path, update_username, update_password);
-	httpServer.begin();
-	
-	MDNS.addService("http", "tcp", 80);
-	DebugPrintf("HTTPUpdateServer ready! Open http://%s.local%s in your browser and login with username '%s' and password '%s'\n", host, update_path, update_username, update_password);
 	
 	mqttClient.setClient(wifiClient);
 	mqttClient.setServer(mqttHost, mqttPort);
 	mqttClient.setCallback(messageReceived);
-	mqttConnect();
-	
-	publishMessageF(temperatureAdjustItem, addressStr, heater.getTemperatureAdjust(), true);
-	publishMessageI(targetTempItem, addressStr, (int)heater.getTargetTemperature(), true);
-	publishMessageF(hysteresisItem, addressStr, hysteresis, true);
-	publishMessageB(isEnabledItem, addressStr, heater.isEnabled, true);
-	publishMessageB(isAutoItem, addressStr, heater.isAuto, true);
-	//publishMessageB(isOnItem, addressStr, heater.isOn, true);
 	
 	sensor.begin();
 	sensor.setResolution(12);
-	
-	ticker.detach();
-	digitalWrite(LED, HIGH);
+
+	digitalWrite(LED, LOW);
 	
 	requestTemp();
 }
 
 void loop()
 {
-	httpServer.handleClient();
-	
-	if(!mqttClient.connected()) {
-		mqttConnect();
+	if (flagMqttTryConnect) {
+		flagMqttTryConnect = false;
+		mqttClient.connect(addressStr);
 	}
 	
-	mqttClient.loop();
-	
-	if (flagSetEepromError) {
-		flagSetEepromError = false;
-		publishMessageB(eepromErrorItem, addressStr, true, true);
-	}
-	
-	if (flagClearEepromError) {
-		flagClearEepromError = false;
-		publishMessageB(eepromErrorItem, addressStr, false, true);
+	if (flagWifiConnected) {
+		if (!flagNetworkServicesInitialized) {
+			DebugPrintln("Wifi connection established.");
+			DebugPrintln("Starting network services.");
+			
+			MDNS.begin(host);
+				
+			httpUpdater.setup(&httpServer, update_path, update_username, update_password);
+			httpServer.begin();
+				
+			MDNS.addService("http", "tcp", 80);
+			DebugPrintf("HTTPUpdateServer ready! Open http://%s.local%s in your browser and login with username '%s' and password '%s'\n", host, update_path, update_username, update_password);
+				
+			flagNetworkServicesInitialized = true;
+			blinker.detach();
+		} else { //If wifi is connected and network services initialized
+			httpServer.handleClient();
+		}
+		
+		if(!flagMqttIsConnected) {
+			if (!flagMqttIsConnecting) {
+				DebugPrintln("Starting mqtt connection.");
+				blinker.attach_ms(100, blink);
+				mqttConnector.attach(1, mqttConnect);
+				flagMqttIsConnecting = true;
+			}
+			
+			if (mqttClient.connected()) {
+				DebugPrintln("Mqtt connection established.");
+				mqttConnector.detach();
+				blinker.detach();
+				mqttClient.subscribe(mqttCommandsTopic);
+				flagMqttIsConnected = true;
+				flagMqttIsConnecting = false;
+				
+				publishMessageF(temperatureAdjustItem, addressStr, heater.getTemperatureAdjust(), true);
+				publishMessageI(targetTempItem, addressStr, (int)heater.getTargetTemperature(), true);
+				publishMessageF(hysteresisItem, addressStr, hysteresis, true);
+				publishMessageB(isEnabledItem, addressStr, heater.isEnabled, true);
+				publishMessageB(isAutoItem, addressStr, heater.isAuto, true);
+			}
+		} else { //If mqtt is connected
+			if (!mqttClient.connected()) { //Detect mqtt disconnect
+				DebugPrintln("Mqtt disconnected.");
+				flagMqttIsConnected = false;
+				flagMqttIsConnecting = false;
+				return;
+			}
+			
+			mqttClient.loop();
+			
+			if (flagSetEepromError) {
+				flagSetEepromError = false;
+				publishMessageB(eepromErrorItem, addressStr, true, true);
+			}
+			
+			if (flagClearEepromError) {
+				flagClearEepromError = false;
+				publishMessageB(eepromErrorItem, addressStr, false, true);
+			}						
+		}
+	} else { //If wifi is not connected
+		if (!flagWifiIsConnecting) {
+			DebugPrintln("Starting wifi connection.");
+			WiFi.begin(ssid, password);
+			blinker.attach_ms(50, blink);
+			flagWifiIsConnecting = true;
+		}
 	}
 	
 	if (flagProcessHeater) {
@@ -526,8 +578,11 @@ void loop()
 					digitalWrite(RELAY, LOW);
 				}
 			}
-			publishMessageF(tempItem, addressStr, heater.getTemperature(), false);
-			publishMessageB(isOnItem, addressStr, heater.isOn, false);
+			
+			if(flagWifiConnected && flagMqttIsConnected) {
+				publishMessageF(tempItem, addressStr, heater.getTemperature(), false);
+				publishMessageB(isOnItem, addressStr, heater.isOn, false);
+			}
 		}
 	}
 }
