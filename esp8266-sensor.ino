@@ -40,7 +40,7 @@ bool flagMqttIsConnected = false, flagMqttIsConnecting = false;
 bool flagMqttTryConnect = false;
 
 #define ADDR_LEN 3
-const byte address[ADDR_LEN] = {0x00,0x00,0x0E};
+const byte address[ADDR_LEN] = {0x00,0x00,0x11};
 char addressStr[ADDR_LEN * 2 + 1];
 
 #define MAX_COMMAND_LEN 15
@@ -387,7 +387,7 @@ void saveConfig(HeaterItem* item, size_t len) {
 		} else {
 			DebugPrintln("Writing config failed.");
 		}
-		DebugPrintf("Written %d bytes.", written);
+		DebugPrintf("Written %d bytes.\n", written);
 		configFile.close();
 	}
 }
@@ -481,7 +481,11 @@ void loop()
 {
 	if (flagMqttTryConnect) {
 		flagMqttTryConnect = false;
-		mqttClient.connect(addressStr);
+		char topic[100];
+		char message[4] = "OFF";
+		sprintf(topic, "%sitem_%s_%s", mqttStatusesTopic, addressStr, presenceItem);
+
+		mqttClient.connect(addressStr, mqttUser, mqttPassword, topic, 0, true, message);
 	}
 	
 	if (flagWifiConnected) {
@@ -516,6 +520,7 @@ void loop()
 				mqttConnector.detach();
 				blinker.detach();
 				mqttClient.subscribe(mqttCommandsTopic);
+				publishMessageB(presenceItem, addressStr, true, true);
 				flagMqttIsConnected = true;
 				flagMqttIsConnecting = false;
 				

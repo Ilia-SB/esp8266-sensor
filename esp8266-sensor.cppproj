@@ -61,7 +61,6 @@
       <Value>LWIP_OPEN_SRC</Value>
       <Value>ARDUINO_ESP8266_NODEMCU</Value>
       <Value>ARDUINO_ARCH_ESP8266</Value>
-      <Value>DEBUG</Value>
     </ListValues>
   </armgcc.compiler.symbols.DefSymbols>
   <armgcc.compiler.directories.IncludePaths>
@@ -120,7 +119,6 @@
       <Value>LWIP_OPEN_SRC</Value>
       <Value>ARDUINO_ESP8266_NODEMCU</Value>
       <Value>ARDUINO_ARCH_ESP8266</Value>
-      <Value>DEBUG</Value>
     </ListValues>
   </armgcccpp.compiler.symbols.DefSymbols>
   <armgcccpp.compiler.directories.IncludePaths>
@@ -428,7 +426,6 @@ build.arch=ESP8266
       <Value>LWIP_OPEN_SRC</Value>
       <Value>ARDUINO_ESP8266_NODEMCU</Value>
       <Value>ARDUINO_ARCH_ESP8266</Value>
-      <Value>DEBUG</Value>
     </ListValues>
   </armgcc.compiler.symbols.DefSymbols>
   <armgcc.compiler.directories.IncludePaths>
@@ -487,7 +484,6 @@ build.arch=ESP8266
       <Value>LWIP_OPEN_SRC</Value>
       <Value>ARDUINO_ESP8266_NODEMCU</Value>
       <Value>ARDUINO_ARCH_ESP8266</Value>
-      <Value>DEBUG</Value>
     </ListValues>
   </armgcccpp.compiler.symbols.DefSymbols>
   <armgcccpp.compiler.directories.IncludePaths>
