@@ -39,10 +39,6 @@ bool flagNetworkServicesInitialized = false;
 bool flagMqttIsConnected = false, flagMqttIsConnecting = false;
 bool flagMqttTryConnect = false;
 
-#define ADDR_LEN 3
-const byte address[ADDR_LEN] = {0x00,0x00,0x11};
-char addressStr[ADDR_LEN * 2 + 1];
-
 #define MAX_COMMAND_LEN 15
 
 ESP8266WebServer httpServer(80);
