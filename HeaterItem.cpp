@@ -78,8 +78,8 @@ void HeaterItem::getTemperatureAdjustBytes(byte *array) {
 	} else {
 		array[0] = 0;
 	}
-	array[1] = temperatureAdjust;
-	array[2] = temperatureAdjust*100 - array[1]*100;
+	array[1] = abs(temperatureAdjust);
+	array[2] = abs(temperatureAdjust)*100 - array[1]*100;
 }
 
 float HeaterItem::getDelta() {

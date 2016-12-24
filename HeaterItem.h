@@ -11,12 +11,14 @@
 
 #include "Arduino.h"
 
+#define ADDR_LEN 3
+
 class HeaterItem
 {
 //variables
 public:
 	boolean isEnabled;
-	byte address[3];
+	byte address[ADDR_LEN];
 	byte sensorAddress[8];
 	byte port;
 	byte pin;

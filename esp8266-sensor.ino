@@ -14,6 +14,7 @@
 #include "config.h"
 #include "mqtt_interface.h"
 #include "eepromAddr.h"
+#include "Settings.h"
 
 #define LED			2
 #define ONE_WIRE	5
@@ -21,8 +22,57 @@
 
 static PROGMEM prog_uint32_t crc_table[16] = {0x00000000, 0x1db71064, 0x3b6e20c8, 0x26d930ac, 0x76dc4190, 0x6b6b51f4, 0x4db26158, 0x5005713c,
 	0xedb88320, 0xf00f9344, 0xd6d6a3e8, 0xcb61b38c, 0x9b64c2b0, 0x86d3d2d4, 0xa00ae278, 0xbdbdf21c};
-
-File configFile;
+	
+const char SETTINGS_HTML[] = "<!DOCTYPE HTML>"
+"<html>"
+"<head>"
+"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">"
+"<title>Settings</title>"
+"</head>"
+"<body>"
+"<form method=\"post\" action=\"/savesettings\">"
+"<h2>Settings</h2>"
+"<p></p>"
+"</div>"
+"<ul >"
+"<li>"
+"<label>Unit address </label>"
+"<input type=\"text\" name=\"addr\" maxlength=\"6\" value=\"\"/>"
+"</li>"
+"<li>"
+"<label>WiFi SSID </label>"
+"<input type=\"text\" name=\"ssid\" maxlength=\"12\" value=\"\"/>"
+"</li>"
+"<li>"
+"<label>WiFi password </label>"
+"<input type=\"text\" name=\"password\" maxlength=\"12\" value=\"\"/>"
+"</li>"
+"<li>"
+"<label>Mqtt host </label>"
+"<input type=\"text\" name=\"mqttHost\" maxlength=\"12\" value=\"\"/>"
+"</li>"
+"<li>"
+"<label>Mqtt PORT </label>"
+"<input type=\"text\" name=\"mqttPort\" maxlength=\"4\" value=\"\"/>"
+"</li>"
+"<li>"
+"<label>Mqtt user </label>"
+"<input type=\"text\" name=\"mqttUser\" maxlength=\"12\" value=\"\"/>"
+"</li>"
+"<li>"
+"<label>Mqtt password </label>"
+"<input maxlength=\"12\" name=\"mqttPassword\" value=\"\"/>"
+"</li>"
+"<li>"
+"<input type=\"submit\" name=\"submit\" value=\"Submit\" />"
+"</li>"
+"</ul>"
+"</form>"
+"</body>"
+"</html>";
+	
+Settings sett;
+File configFile, settingsFile;
 #define CONFIG_BUFFER_LEN 19
 uint8_t configBuffer[CONFIG_BUFFER_LEN+1];
 
@@ -146,7 +196,7 @@ void messageReceived(char* topic, unsigned char* pld, unsigned int pldLength) {
 	}
 
 	//check if the command is for this unit
-	if (strcmp(addressStr, itemAddr)) {
+	if (strcmp(sett.settings.address, itemAddr)) {
 		return; //not for this unit
 	}
 	
@@ -166,8 +216,8 @@ void executeCommand(const char* command, const char* payload) {
 		if (!heater.isAuto) {
 			heater.isOn = false;
 		}
-		publishMessageB(isAutoItem, addressStr, heater.isAuto, true);
-		publishMessageB(isOnItem, addressStr, heater.isOn, false);
+		publishMessageB(isAutoItem, sett.settings.address, heater.isAuto, true);
+		publishMessageB(isOnItem, sett.settings.address, heater.isOn, false);
 	} else
 	if (!strcmp(command, isEnabledItem)) {
 		DebugPrintln("isEnabled");
@@ -176,33 +226,33 @@ void executeCommand(const char* command, const char* payload) {
 			heater.isAuto = false;
 			heater.isOn = false;
 		}
-		publishMessageB(isEnabledItem, addressStr, heater.isEnabled, true);
-		publishMessageB(isAutoItem, addressStr, heater.isAuto, true);
-		publishMessageB(isOnItem, addressStr, heater.isOn, false);
+		publishMessageB(isEnabledItem, sett.settings.address, heater.isEnabled, true);
+		publishMessageB(isAutoItem, sett.settings.address, heater.isAuto, true);
+		publishMessageB(isOnItem, sett.settings.address, heater.isOn, false);
 	} else
 	if (!strcmp(command, isOnItem)) {
 		DebugPrintln("isOn");
 		if (!heater.isAuto) {
 			heater.isOn = getBoolPayload(payload);
 		}
-		publishMessageB(isOnItem, addressStr, heater.isOn, false);
+		publishMessageB(isOnItem, sett.settings.address, heater.isOn, false);
 	} else
 	if (!strcmp(command, targetTempItem)) {
 		DebugPrintln("setTargetTemp");
 		float temp = strtod(payload, nullptr);
 		heater.setTargetTemperature(temp);
-		publishMessageI(targetTempItem, addressStr, (int)heater.getTargetTemperature(), true);
+		publishMessageI(targetTempItem, sett.settings.address, (int)heater.getTargetTemperature(), true);
 	} else
 	if (!strcmp(command, hysteresisItem)) {
 		DebugPrintln("setHysteresis");
 		hysteresis = strtod(payload, nullptr);
-		publishMessageF(hysteresisItem, addressStr, hysteresis, true);
+		publishMessageF(hysteresisItem, sett.settings.address, hysteresis, true);
 	} else
 	if (!strcmp(command, temperatureAdjustItem)) {
 		DebugPrintln("setTempAdjust");
 		float tempAdjust = strtod(payload, nullptr);
 		heater.setTemperatureAdjust(tempAdjust);
-		publishMessageF(temperatureAdjustItem, addressStr, heater.getTemperatureAdjust(), true);
+		publishMessageF(temperatureAdjustItem, sett.settings.address, heater.getTemperatureAdjust(), true);
 	} else {
 		DebugPrintln("Unknown");
 		return;
@@ -262,7 +312,7 @@ void mqttConnect() {
 	if (!mqttClient.connected() && flagWifiConnected) {
 		DebugPrintln("Connecting to mqtt server");
 		flagMqttTryConnect = true;
-		//mqttClient.connect(addressStr);
+		//mqttClient.connect(sett.settings.address);
 	}
 }
 
@@ -324,8 +374,8 @@ void loadConfig() {
 	}
 	DebugPrintln(" ");
 	unsigned long loaded_crc;
-	memcpy(&loaded_crc, configBuffer + CONFIG_BUFFER_LEN - sizeof loaded_crc, sizeof loaded_crc);
-	unsigned long crc = crc_byte(configBuffer, CONFIG_BUFFER_LEN - sizeof crc);
+	memcpy(&loaded_crc, configBuffer + CONFIG_BUFFER_LEN - sizeof(loaded_crc), sizeof(loaded_crc));
+	unsigned long crc = crc_byte(configBuffer, CONFIG_BUFFER_LEN - sizeof(crc));
 	if (loaded_crc == crc) {
 		deserialize(configBuffer, &heater);
 		flagClearEepromError = true;
@@ -349,6 +399,77 @@ void loadConfig() {
 	#endif
 	
 	//TODO: crc and eeprom error reporting
+}
+
+void startSettingsServer() {
+	startWifiAP();
+	DebugPrintln("Starting settings server.");
+	httpServer.on("/", handleRoot);
+	httpServer.on("/savesettings", handleSaveSettings);
+	httpServer.begin();
+	while(true) {
+		httpServer.handleClient();
+		yield();
+	}
+}
+
+void startWifiAP() {
+	DebugPrintln("Starting WiFi access point.");
+	const char *ssid = "Sensor";
+	WiFi.persistent(false);
+	WiFi.mode(WIFI_STA);
+	WiFi.softAP(ssid);
+}
+
+void loadSettings() {
+	DebugPrintln("Loading settings");
+	settingsFile = SPIFFS.open("/settings", "r");
+	if (!settingsFile) {
+		DebugPrintln("Settings file missing. Going into settings mode.");
+		startSettingsServer();
+	}
+	settingsFile.readBytes((char*)sett.getSettingsPointer(), sett.getSettingsSize());
+	settingsFile.close();
+	unsigned long loaded_crc;
+	settingsFile.readBytes((char*)&loaded_crc, sizeof(loaded_crc));
+	unsigned long crc = crc_byte((byte*)sett.getSettingsPointer(), sett.getSettingsSize());
+	if (loaded_crc != crc) {
+		DebugPrintln("CRC error loading settings");
+		flagSetEepromError = true;
+		startSettingsServer();
+	}
+	DebugPrintln("Loaded settings:");
+	DebugPrintf("Unit address: %s\r\n", sett.settings.address);
+	DebugPrintf("WiFi SSID: %s\r\n", sett.settings.ssid);
+	DebugPrintf("WiFi password: %s\r\n", sett.settings.password);
+	DebugPrintf("Mqtt host: %s\r\n", sett.settings.mqttHost);
+	DebugPrintf("Mqtt port: %d\r\n", sett.settings.mqttPort);
+	DebugPrintf("Mqtt user: %s\r\n", sett.settings.mqttUser);
+	DebugPrintf("Mqtt password: %s\r\n", sett.settings.mqttPassword);
+}
+
+void handleRoot() {
+	DebugPrintln("Displaying settings page.");
+	httpServer.send(200, "text/html", SETTINGS_HTML);
+}
+
+void handleSaveSettings() {
+	String s;
+	s=httpServer.arg("addr");
+	sett.setAddress(&s);
+	s=httpServer.arg("ssid");
+	sett.setSsid(&s);
+	s=httpServer.arg("password");
+	sett.setPassword(&s);
+	s=httpServer.arg("mqttHost");
+	sett.setMqttHost(&s);
+	sett.settings.mqttPort = httpServer.arg("mqttPort").toInt();
+	s=httpServer.arg("mqttUser");
+	sett.setMqttUser(&s);
+	s=httpServer.arg("mqttPassword");
+	sett.setMqttPassword(&s);
+	httpServer.send(200, "text/html", "Rebooting...");
+	ESP.restart();
 }
 
 void createConfigFile() {
@@ -381,6 +502,35 @@ void saveConfig(HeaterItem* item, size_t len) {
 		if (written == len) {
 			DebugPrintln("Done.");
 		} else {
+			DebugPrintln("Writing config failed.");
+		}
+		DebugPrintf("Written %d bytes.\n", written);
+		configFile.close();
+	}
+}
+
+void saveSettings(const Settings* s) {
+	uint8_t settingsBuffer[100];
+	uint8_t dataLen = s->getSettingsSize();
+	memcpy(settingsBuffer, s->getSettingsPointer(), dataLen);
+	unsigned long crc = crc_byte(configBuffer, dataLen);
+	memcpy(configBuffer + dataLen, &crc, sizeof(crc));
+	dataLen += sizeof(crc);
+	configBuffer[dataLen] = '\0';
+	DebugPrintln("Saving settings.");
+// 	for(int i=0; i<CONFIG_BUFFER_LEN;i++) {
+// 		DebugPrint(configBuffer[i]);DebugPrint(" ");
+// 	}
+//	DebugPrintln(" ");
+	settingsFile = SPIFFS.open("/settings", "w");
+	if (!settingsFile) {
+		DebugPrintln("Settings file creation failed.");
+		return;
+		} else {
+		uint8_t written = settingsFile.write(settingsBuffer, dataLen);
+		if (written == dataLen) {
+			DebugPrintln("Done.");
+			} else {
 			DebugPrintln("Writing config failed.");
 		}
 		DebugPrintf("Written %d bytes.\n", written);
@@ -433,16 +583,12 @@ void setup()
 	pinMode(RELAY, OUTPUT);
 	digitalWrite(RELAY, LOW);
 
-	memcpy(heater.address, address, ADDR_LEN);
-	uint8_t len;
-	heater.getAddressString(addressStr, &len);
-	
 	#ifdef DEBUG
 		Serial.begin(115200);
 	#endif
 	DebugPrintln();
 	DebugPrintln("Starting...");
-	DebugPrintf("This unit's address is: %s\n", addressStr);	
+	DebugPrintf("This unit's address is: %s\n", sett.settings.address);	
 	FSInfo fsInfo;
 	SPIFFS.begin();
 	if (!SPIFFS.info(fsInfo)) {
@@ -454,15 +600,21 @@ void setup()
 		}
 	}
 	
+	loadSettings();
 	loadConfig();
+	
+// 	memcpy(heater.address, address, ADDR_LEN);
+// 	uint8_t len;
+// 	heater.getAddressString(sett.settings.address, &len);
+
 	
 	WiFi.persistent(false);
 	wifiConnectHandler = WiFi.onStationModeGotIP(&onWIFIConnected);
 	wifiDisconnectHandler = WiFi.onStationModeDisconnected(&onWIFIDisconnected);
-	WiFi.mode(WIFI_AP_STA);
+	WiFi.mode(WIFI_STA);
 	
 	mqttClient.setClient(wifiClient);
-	mqttClient.setServer(mqttHost, mqttPort);
+	mqttClient.setServer(sett.settings.mqttHost, sett.settings.mqttPort);
 	mqttClient.setCallback(messageReceived);
 	
 	sensor.begin();
@@ -475,13 +627,14 @@ void setup()
 
 void loop()
 {
+	yield();
 	if (flagMqttTryConnect) {
 		flagMqttTryConnect = false;
 		char topic[100];
 		char message[4] = "OFF";
-		sprintf(topic, "%sitem_%s_%s", mqttStatusesTopic, addressStr, presenceItem);
+		sprintf(topic, "%sitem_%s_%s", mqttStatusesTopic, sett.settings.address, presenceItem);
 
-		mqttClient.connect(addressStr, mqttUser, mqttPassword, topic, 0, true, message);
+		mqttClient.connect(sett.settings.address, sett.settings.mqttUser, sett.settings.mqttPassword, topic, 0, true, message);
 	}
 	
 	if (flagWifiConnected) {
@@ -515,16 +668,16 @@ void loop()
 				DebugPrintln("Mqtt connection established.");
 				mqttConnector.detach();
 				blinker.detach();
-				mqttClient.subscribe(mqttCommandsTopic);
-				publishMessageB(presenceItem, addressStr, true, true);
+				mqttClient.subscribe(mqttCommandsTopic, 1);
+				publishMessageB(presenceItem, sett.settings.address, true, true);
 				flagMqttIsConnected = true;
 				flagMqttIsConnecting = false;
 				
-				publishMessageF(temperatureAdjustItem, addressStr, heater.getTemperatureAdjust(), true);
-				publishMessageI(targetTempItem, addressStr, (int)heater.getTargetTemperature(), true);
-				publishMessageF(hysteresisItem, addressStr, hysteresis, true);
-				publishMessageB(isEnabledItem, addressStr, heater.isEnabled, true);
-				publishMessageB(isAutoItem, addressStr, heater.isAuto, true);
+				publishMessageF(temperatureAdjustItem, sett.settings.address, heater.getTemperatureAdjust(), true);
+				publishMessageI(targetTempItem, sett.settings.address, (int)heater.getTargetTemperature(), true);
+				publishMessageF(hysteresisItem, sett.settings.address, hysteresis, true);
+				publishMessageB(isEnabledItem, sett.settings.address, heater.isEnabled, true);
+				publishMessageB(isAutoItem, sett.settings.address, heater.isAuto, true);
 			}
 		} else { //If mqtt is connected
 			if (!mqttClient.connected()) { //Detect mqtt disconnect
@@ -538,18 +691,18 @@ void loop()
 			
 			if (flagSetEepromError) {
 				flagSetEepromError = false;
-				publishMessageB(eepromErrorItem, addressStr, true, true);
+				publishMessageB(eepromErrorItem, sett.settings.address, true, true);
 			}
 			
 			if (flagClearEepromError) {
 				flagClearEepromError = false;
-				publishMessageB(eepromErrorItem, addressStr, false, true);
+				publishMessageB(eepromErrorItem, sett.settings.address, false, true);
 			}						
 		}
 	} else { //If wifi is not connected
 		if (!flagWifiIsConnecting) {
 			DebugPrintln("Starting wifi connection.");
-			WiFi.begin(ssid, password);
+			WiFi.begin(sett.settings.ssid, sett.settings.password);
 			blinker.attach_ms(50, blink);
 			flagWifiIsConnecting = true;
 		}
@@ -581,8 +734,8 @@ void loop()
 			}
 			
 			if(flagWifiConnected && flagMqttIsConnected) {
-				publishMessageF(tempItem, addressStr, heater.getTemperature(), false);
-				publishMessageB(isOnItem, addressStr, heater.isOn, false);
+				publishMessageF(tempItem, sett.settings.address, heater.getTemperature(), false);
+				publishMessageB(isOnItem, sett.settings.address, heater.isOn, false);
 			}
 		}
 	}
