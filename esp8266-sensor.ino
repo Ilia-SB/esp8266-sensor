@@ -253,6 +253,12 @@ void executeCommand(const char* command, const char* payload) {
 		float tempAdjust = strtod(payload, nullptr);
 		heater.setTemperatureAdjust(tempAdjust);
 		publishMessageF(temperatureAdjustItem, sett.settings.address, heater.getTemperatureAdjust(), true);
+	} else
+	if (!strcmp(command, eraseSettingsItem)} {
+		DebugPrintln("eraseSettings");
+		SPIFFS.remove("/settings");
+		ESP.restart();
+	}
 	} else {
 		DebugPrintln("Unknown");
 		return;
@@ -428,24 +434,29 @@ void loadSettings() {
 		DebugPrintln("Settings file missing. Going into settings mode.");
 		startSettingsServer();
 	}
-	settingsFile.readBytes((char*)sett.getSettingsPointer(), sett.getSettingsSize());
-	settingsFile.close();
+	uint readBytes = settingsFile.readBytes((char*)sett.getSettingsPointer(), sett.getSettingsSize());
+	DebugPrintf("Read %u bytes of data.\r\n", readBytes);
+	
+		DebugPrintln("Loaded settings:");
+		DebugPrintf("Unit address: %s\r\n", sett.settings.address);
+		DebugPrintf("WiFi SSID: %s\r\n", sett.settings.ssid);
+		DebugPrintf("WiFi password: %s\r\n", sett.settings.password);
+		DebugPrintf("Mqtt host: %s\r\n", sett.settings.mqttHost);
+		DebugPrintf("Mqtt port: %d\r\n", sett.settings.mqttPort);
+		DebugPrintf("Mqtt user: %s\r\n", sett.settings.mqttUser);
+		DebugPrintf("Mqtt password: %s\r\n", sett.settings.mqttPassword);
+	
 	unsigned long loaded_crc;
-	settingsFile.readBytes((char*)&loaded_crc, sizeof(loaded_crc));
+	readBytes = settingsFile.readBytes((char*)&loaded_crc, sizeof(loaded_crc));
+	DebugPrintf("Read %u bytes of crc.\r\n", readBytes);
+	settingsFile.close();
 	unsigned long crc = crc_byte((byte*)sett.getSettingsPointer(), sett.getSettingsSize());
 	if (loaded_crc != crc) {
+		DebugPrintf("%lu | %lu\r\n", loaded_crc, crc);
 		DebugPrintln("CRC error loading settings");
 		flagSetEepromError = true;
 		startSettingsServer();
 	}
-	DebugPrintln("Loaded settings:");
-	DebugPrintf("Unit address: %s\r\n", sett.settings.address);
-	DebugPrintf("WiFi SSID: %s\r\n", sett.settings.ssid);
-	DebugPrintf("WiFi password: %s\r\n", sett.settings.password);
-	DebugPrintf("Mqtt host: %s\r\n", sett.settings.mqttHost);
-	DebugPrintf("Mqtt port: %d\r\n", sett.settings.mqttPort);
-	DebugPrintf("Mqtt user: %s\r\n", sett.settings.mqttUser);
-	DebugPrintf("Mqtt password: %s\r\n", sett.settings.mqttPassword);
 }
 
 void handleRoot() {
@@ -468,6 +479,17 @@ void handleSaveSettings() {
 	sett.setMqttUser(&s);
 	s=httpServer.arg("mqttPassword");
 	sett.setMqttPassword(&s);
+		
+		DebugPrintln("Received settings:");
+		DebugPrintf("Unit address: %s\r\n", sett.settings.address);
+		DebugPrintf("WiFi SSID: %s\r\n", sett.settings.ssid);
+		DebugPrintf("WiFi password: %s\r\n", sett.settings.password);
+		DebugPrintf("Mqtt host: %s\r\n", sett.settings.mqttHost);
+		DebugPrintf("Mqtt port: %d\r\n", sett.settings.mqttPort);
+		DebugPrintf("Mqtt user: %s\r\n", sett.settings.mqttUser);
+		DebugPrintf("Mqtt password: %s\r\n", sett.settings.mqttPassword);
+		
+	saveSettings(&sett);
 	httpServer.send(200, "text/html", "Rebooting...");
 	ESP.restart();
 }
@@ -513,15 +535,15 @@ void saveSettings(const Settings* s) {
 	uint8_t settingsBuffer[100];
 	uint8_t dataLen = s->getSettingsSize();
 	memcpy(settingsBuffer, s->getSettingsPointer(), dataLen);
-	unsigned long crc = crc_byte(configBuffer, dataLen);
-	memcpy(configBuffer + dataLen, &crc, sizeof(crc));
+	unsigned long crc = crc_byte(settingsBuffer, dataLen);
+	memcpy(settingsBuffer + dataLen, &crc, sizeof(crc));
 	dataLen += sizeof(crc);
 	configBuffer[dataLen] = '\0';
 	DebugPrintln("Saving settings.");
-// 	for(int i=0; i<CONFIG_BUFFER_LEN;i++) {
-// 		DebugPrint(configBuffer[i]);DebugPrint(" ");
-// 	}
-//	DebugPrintln(" ");
+ 	for(int i=0; i<dataLen+1; i++) {
+ 		DebugPrint(settingsBuffer[i]);DebugPrint(" ");
+ 	}
+	DebugPrintln(" ");
 	settingsFile = SPIFFS.open("/settings", "w");
 	if (!settingsFile) {
 		DebugPrintln("Settings file creation failed.");
@@ -530,11 +552,11 @@ void saveSettings(const Settings* s) {
 		uint8_t written = settingsFile.write(settingsBuffer, dataLen);
 		if (written == dataLen) {
 			DebugPrintln("Done.");
+			DebugPrintf("Written %d bytes.\n", written);
 			} else {
 			DebugPrintln("Writing config failed.");
 		}
-		DebugPrintf("Written %d bytes.\n", written);
-		configFile.close();
+		settingsFile.close();
 	}
 }
 
@@ -599,6 +621,8 @@ void setup()
 			DebugPrintln("Failed.");
 		}
 	}
+	
+	//SPIFFS.remove("/settings");
 	
 	loadSettings();
 	loadConfig();

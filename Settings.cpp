@@ -29,8 +29,10 @@ void fillProperty(char* dest, String* src) {
 
 void Settings::setAddress(String* address) {
 	memset(buffer, '\0', 13);
-	address->toCharArray(buffer, 4);
+	address->toCharArray(buffer, 13);
+	DebugPrintf("%s, %d\r\n", buffer, address->length()+1);
 	memcpy(settings.address, buffer, address->length()+1);
+	DebugPrintf("%s\r\n", settings.address);
 }
 
 void Settings::setSsid(String* ssid) {

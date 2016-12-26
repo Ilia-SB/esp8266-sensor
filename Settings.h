@@ -12,13 +12,14 @@
 #include <stdint.h>
 #include <string.h>
 #include <Arduino.h>
+#include "debug_print.h"
 
 class Settings
 {
 //variables
 public:
 	struct __attribute__((__packed__)) StructSettings {
-		char address[4];
+		char address[7];
 		char ssid[13];
 		char password[13];
 		char mqttHost[16];
