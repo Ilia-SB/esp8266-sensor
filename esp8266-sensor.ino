@@ -23,7 +23,8 @@
 static PROGMEM prog_uint32_t crc_table[16] = {0x00000000, 0x1db71064, 0x3b6e20c8, 0x26d930ac, 0x76dc4190, 0x6b6b51f4, 0x4db26158, 0x5005713c,
 	0xedb88320, 0xf00f9344, 0xd6d6a3e8, 0xcb61b38c, 0x9b64c2b0, 0x86d3d2d4, 0xa00ae278, 0xbdbdf21c};
 	
-const char SETTINGS_HTML[] = "<!DOCTYPE HTML>"
+char SETTINGS_HTML[2048];
+/* = "<!DOCTYPE HTML>"
 "<html>"
 "<head>"
 "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">"
@@ -70,6 +71,7 @@ const char SETTINGS_HTML[] = "<!DOCTYPE HTML>"
 "</form>"
 "</body>"
 "</html>";
+*/
 	
 Settings sett;
 File configFile, settingsFile;
@@ -182,6 +184,20 @@ void publishMessageB(const char* item, const char* addr, bool state, bool persis
 	} else {
 		memcpy(payload, "OFF", 4);
 	}
+
+	mqttClient.publish(topic, payload, persist);
+}
+
+void publishMessageS(const char* addr, const char* text, bool persist) {
+	if (!mqttClient.connected()) {
+		DebugPrintln("Mqtt not connected.");
+		return;
+	}
+	char topic[100];
+	char payload[256];
+	sprintf(topic, "%s%s", mqttDebugTopic, addr);
+	
+	sprintf (payload, "%s", text);
 
 	mqttClient.publish(topic, payload, persist);
 }
@@ -402,15 +418,59 @@ void loadConfig() {
 }
 
 void startSettingsServer() {
-	startWifiAP();
+	sprintf(SETTINGS_HTML,
+		"<!DOCTYPE HTML>"
+		"<html>"
+		"<head>"
+		"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">"
+		"<title>Settings</title>"
+		"</head>"
+		"<body>"
+		"<form method=\"post\" action=\"/savesettings\">"
+		"<h2>Settings</h2>"
+		"<p></p>"
+		"</div>"
+		"<ul >"
+		"<li>"
+		"<label>Unit address </label>"
+		"<input type=\"text\" name=\"addr\" maxlength=\"6\" value=\"%s\"/>"
+		"</li>"
+		"<li>"
+		"<label>WiFi SSID </label>"
+		"<input type=\"text\" name=\"ssid\" maxlength=\"12\" value=\"%s\"/>"
+		"</li>"
+		"<li>"
+		"<label>WiFi password </label>"
+		"<input type=\"text\" name=\"password\" maxlength=\"12\" value=\"%s\"/>"
+		"</li>"
+		"<li>"
+		"<label>Mqtt host </label>"
+		"<input type=\"text\" name=\"mqttHost\" maxlength=\"12\" value=\"%s\"/>"
+		"</li>"
+		"<li>"
+		"<label>Mqtt PORT </label>"
+		"<input type=\"text\" name=\"mqttPort\" maxlength=\"4\" value=\"%d\"/>"
+		"</li>"
+		"<li>"
+		"<label>Mqtt user </label>"
+		"<input type=\"text\" name=\"mqttUser\" maxlength=\"12\" value=\"%s\"/>"
+		"</li>"
+		"<li>"
+		"<label>Mqtt password </label>"
+		"<input maxlength=\"12\" name=\"mqttPassword\" value=\"%s\"/>"
+		"</li>"
+		"<li>"
+		"<input type=\"submit\" name=\"submit\" value=\"Submit\" />"
+		"</li>"
+		"</ul>"
+		"</form>"
+		"</body>"
+		"</html>",
+	sett.settings.address, sett.settings.ssid, sett.settings.password, sett.settings.mqttHost, sett.settings.mqttPort, sett.settings.mqttUser, sett.settings.mqttPassword);
+	
 	DebugPrintln("Starting settings server.");
 	httpServer.on("/", handleRoot);
 	httpServer.on("/savesettings", handleSaveSettings);
-	httpServer.begin();
-	while(true) {
-		httpServer.handleClient();
-		yield();
-	}
 }
 
 void startWifiAP() {
@@ -426,18 +486,43 @@ void loadSettings() {
 	settingsFile = SPIFFS.open("/settings", "r");
 	if (!settingsFile) {
 		DebugPrintln("Settings file missing. Going into settings mode.");
+		startWifiAP();
 		startSettingsServer();
+		httpServer.begin();
+		while(true) {
+			httpServer.handleClient();
+			yield();
+		}
+		return;
 	}
-	settingsFile.readBytes((char*)sett.getSettingsPointer(), sett.getSettingsSize());
-	settingsFile.close();
+	byte settingsBuffer[100];
+	memset(settingsBuffer, '\0', 100);
+	DebugPrintf("Reading %d bytes.\n", sett.getSettingsSize());
+	uint8_t dataLen = sett.getSettingsSize();
+	uint8_t read = settingsFile.readBytes((char*)settingsBuffer, dataLen);
+	DebugPrintf("Read: %d bytes\n", read);
+	for(uint8_t i=0; i<dataLen; i++) {
+		DebugPrint(settingsBuffer[i]);
+	}
+	DebugPrintln();
 	unsigned long loaded_crc;
 	settingsFile.readBytes((char*)&loaded_crc, sizeof(loaded_crc));
-	unsigned long crc = crc_byte((byte*)sett.getSettingsPointer(), sett.getSettingsSize());
+	settingsFile.close();
+	unsigned long crc = crc_byte(settingsBuffer, sett.getSettingsSize());
 	if (loaded_crc != crc) {
-		DebugPrintln("CRC error loading settings");
+		DebugPrint(loaded_crc); DebugPrint("<>"); DebugPrintln(crc);
+		DebugPrintln("CRC error loading settings. Going into settings mode.");
 		flagSetEepromError = true;
+		startWifiAP();
 		startSettingsServer();
+		httpServer.begin();
+		while(true) {
+			httpServer.handleClient();
+			yield();
+		}
+		return;
 	}
+	memcpy(sett.getSettingsPointer(), settingsBuffer, sett.getSettingsSize());
 	DebugPrintln("Loaded settings:");
 	DebugPrintf("Unit address: %s\r\n", sett.settings.address);
 	DebugPrintf("WiFi SSID: %s\r\n", sett.settings.ssid);
@@ -454,6 +539,12 @@ void handleRoot() {
 }
 
 void handleSaveSettings() {
+	DebugPrintln("Checking settings file.");
+	settingsFile= SPIFFS.open("/settings", "w");
+	if (!settingsFile) {
+		DebugPrintln("Settings file creation failed. Formatting SPIFFS");
+	}
+	settingsFile.close();
 	String s;
 	s=httpServer.arg("addr");
 	sett.setAddress(&s);
@@ -468,7 +559,23 @@ void handleSaveSettings() {
 	sett.setMqttUser(&s);
 	s=httpServer.arg("mqttPassword");
 	sett.setMqttPassword(&s);
+	
+	/*
+	uint8_t settingsBuffer[100];
+	uint8_t dataLen = sett.getSettingsSize();
+	DebugPrintf("Settings size: %d\n", dataLen);
+	DebugPrintf("Settings pointer: %p\n", sett.getSettingsPointer());
+	memcpy(settingsBuffer, sett.getSettingsPointer(), dataLen);
+	unsigned long crc = crc_byte(settingsBuffer, dataLen);
+	memcpy(settingsBuffer + dataLen, &crc, sizeof(crc));
+	dataLen += sizeof(crc);
+	settingsBuffer[dataLen] = '\0';
+	DebugPrintf("Raw settings: %s\n", settingsBuffer);
+	*/
+	
+	saveSettings(&sett);
 	httpServer.send(200, "text/html", "Rebooting...");
+	SPIFFS.end();
 	ESP.restart();
 }
 
@@ -510,31 +617,37 @@ void saveConfig(HeaterItem* item, size_t len) {
 }
 
 void saveSettings(const Settings* s) {
-	uint8_t settingsBuffer[100];
+	DebugPrintln("Saving settings.");
+	byte settingsBuffer[100];
 	uint8_t dataLen = s->getSettingsSize();
 	memcpy(settingsBuffer, s->getSettingsPointer(), dataLen);
-	unsigned long crc = crc_byte(configBuffer, dataLen);
-	memcpy(configBuffer + dataLen, &crc, sizeof(crc));
+	DebugPrintf("Settings size: %d\n", dataLen);
+	DebugPrintf("Settings pointer: %p\n", s->getSettingsPointer());
+	DebugPrint("Raw settings: ");
+	for (uint8_t i=0; i<dataLen; i++) {
+		DebugPrint(settingsBuffer[i]);
+	}
+	DebugPrintln();
+	unsigned long crc = crc_byte(settingsBuffer, dataLen);
+	DebugPrintf("CRC: %lu\n", crc);
+	memcpy(settingsBuffer + dataLen, &crc, sizeof(crc));
 	dataLen += sizeof(crc);
-	configBuffer[dataLen] = '\0';
-	DebugPrintln("Saving settings.");
-// 	for(int i=0; i<CONFIG_BUFFER_LEN;i++) {
-// 		DebugPrint(configBuffer[i]);DebugPrint(" ");
-// 	}
-//	DebugPrintln(" ");
+	DebugPrintln();
+	DebugPrintln("Opening settings file.");
 	settingsFile = SPIFFS.open("/settings", "w");
 	if (!settingsFile) {
 		DebugPrintln("Settings file creation failed.");
 		return;
-		} else {
+	} else {
+		DebugPrintln("Writing settings.");
 		uint8_t written = settingsFile.write(settingsBuffer, dataLen);
 		if (written == dataLen) {
 			DebugPrintln("Done.");
-			} else {
+		} else {
 			DebugPrintln("Writing config failed.");
 		}
 		DebugPrintf("Written %d bytes.\n", written);
-		configFile.close();
+		settingsFile.close();
 	}
 }
 
@@ -588,9 +701,9 @@ void setup()
 	#endif
 	DebugPrintln();
 	DebugPrintln("Starting...");
-	DebugPrintf("This unit's address is: %s\n", sett.settings.address);	
 	FSInfo fsInfo;
 	SPIFFS.begin();
+	/*
 	if (!SPIFFS.info(fsInfo)) {
 		DebugPrintln("File system not formatted. Formatting...");
 		if (SPIFFS.format()) {
@@ -599,9 +712,11 @@ void setup()
 			DebugPrintln("Failed.");
 		}
 	}
-	
+	*/
+		
 	loadSettings();
 	loadConfig();
+	DebugPrintf("This unit's address is: %s\n", sett.settings.address);
 	
 // 	memcpy(heater.address, address, ADDR_LEN);
 // 	uint8_t len;
@@ -645,9 +760,11 @@ void loop()
 			MDNS.begin(host);
 				
 			httpUpdater.setup(&httpServer, update_path, update_username, update_password);
+			startSettingsServer();
 			httpServer.begin();
 				
 			MDNS.addService("http", "tcp", 80);
+			publishMessageS(sett.settings.address, "Network services started", false);
 			DebugPrintf("HTTPUpdateServer ready! Open http://%s.local%s in your browser and login with username '%s' and password '%s'\n", host, update_path, update_username, update_password);
 				
 			flagNetworkServicesInitialized = true;

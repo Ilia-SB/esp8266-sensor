@@ -24,13 +24,13 @@ Settings::~Settings()
 void fillProperty(char* dest, String* src) {
 	memset(buffer, '\0', 13);
 	src->toCharArray(buffer, 13);
-	memcpy(dest, buffer, src->length()+1);
+	memcpy(dest, buffer, src->length());
 }
 
 void Settings::setAddress(String* address) {
 	memset(buffer, '\0', 13);
-	address->toCharArray(buffer, 4);
-	memcpy(settings.address, buffer, address->length()+1);
+	address->toCharArray(buffer, 7);
+	memcpy(settings.address, buffer, 7);
 }
 
 void Settings::setSsid(String* ssid) {

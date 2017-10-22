@@ -50,8 +50,8 @@ void HeaterItem::getTemperatureBytes(byte *array) {
 	} else {
 		array[0] = 0;
 	}
-	array[1] = temp;
-	array[2] = temp*100 - array[1]*100;
+	array[1] = abs(temp);
+	array[2] = abs(temp)*100 - array[1]*100;
 }
 
 void HeaterItem::setTargetTemperature(float temp) {

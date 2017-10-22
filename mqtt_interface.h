@@ -5,6 +5,7 @@
 
 const char* mqttStatusesTopic = "ehome/heating/statuses/";
 const char* mqttCommandsTopic = "ehome/heating/commands/#";
+const char* mqttDebugTopic	  = "ehome/heating/debug/";
 
 const char* presenceItem = "presence";
 const char* tempItem = "temp";

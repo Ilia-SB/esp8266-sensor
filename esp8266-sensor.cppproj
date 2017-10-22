@@ -71,18 +71,9 @@
       <Value>C:/Users/Ivanov/Documents/Arduino/libraries/DallasTemperature</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/Ticker</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266HTTPUpdateServer/src</Value>
+      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266mDNS</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WiFi/src</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WebServer/src</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266mDNS</Value>
-      <Value>C:/Users/Ivanov/Documents/Arduino/libraries/DallasTemperature/utility</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/EEPROM/utility</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266HTTPUpdateServer/src/utility</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266mDNS/utility</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WebServer/src/utility</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WiFi/src/utility</Value>
-      <Value>C:/Users/Ivanov/Documents/Arduino/libraries/OneWire/utility</Value>
-      <Value>C:/Users/Ivanov/Documents/Arduino/libraries/PubSubClient/src/utility</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/Ticker/utility</Value>
       <Value>C:/Program Files (x86)/Arduino/libraries</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries</Value>
       <Value>C:/Users/Ivanov/Documents/Arduino/libraries</Value>
@@ -94,7 +85,6 @@
       <Value>../../../esp8266-sensor</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/tools/sdk/include</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/tools/sdk/lwip/include</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/Temp/VMBuilds/esp8266-sensor/esp8266_nodemcuv2/core</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2/xtensa-lx106-elf</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include</Value>
@@ -129,18 +119,9 @@
       <Value>C:/Users/Ivanov/Documents/Arduino/libraries/DallasTemperature</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/Ticker</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266HTTPUpdateServer/src</Value>
+      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266mDNS</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WiFi/src</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WebServer/src</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266mDNS</Value>
-      <Value>C:/Users/Ivanov/Documents/Arduino/libraries/DallasTemperature/utility</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/EEPROM/utility</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266HTTPUpdateServer/src/utility</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266mDNS/utility</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WebServer/src/utility</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WiFi/src/utility</Value>
-      <Value>C:/Users/Ivanov/Documents/Arduino/libraries/OneWire/utility</Value>
-      <Value>C:/Users/Ivanov/Documents/Arduino/libraries/PubSubClient/src/utility</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/Ticker/utility</Value>
       <Value>C:/Program Files (x86)/Arduino/libraries</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries</Value>
       <Value>C:/Users/Ivanov/Documents/Arduino/libraries</Value>
@@ -152,7 +133,6 @@
       <Value>../../../esp8266-sensor</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/tools/sdk/include</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/tools/sdk/lwip/include</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/Temp/VMBuilds/esp8266-sensor/esp8266_nodemcuv2/core</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2/xtensa-lx106-elf</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include</Value>
@@ -436,18 +416,9 @@ build.arch=ESP8266
       <Value>C:/Users/Ivanov/Documents/Arduino/libraries/DallasTemperature</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/Ticker</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266HTTPUpdateServer/src</Value>
+      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266mDNS</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WiFi/src</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WebServer/src</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266mDNS</Value>
-      <Value>C:/Users/Ivanov/Documents/Arduino/libraries/DallasTemperature/utility</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/EEPROM/utility</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266HTTPUpdateServer/src/utility</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266mDNS/utility</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WebServer/src/utility</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WiFi/src/utility</Value>
-      <Value>C:/Users/Ivanov/Documents/Arduino/libraries/OneWire/utility</Value>
-      <Value>C:/Users/Ivanov/Documents/Arduino/libraries/PubSubClient/src/utility</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/Ticker/utility</Value>
       <Value>C:/Program Files (x86)/Arduino/libraries</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries</Value>
       <Value>C:/Users/Ivanov/Documents/Arduino/libraries</Value>
@@ -459,7 +430,6 @@ build.arch=ESP8266
       <Value>../../../esp8266-sensor</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/tools/sdk/include</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/tools/sdk/lwip/include</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/Temp/VMBuilds/esp8266-sensor/esp8266_nodemcuv2/core</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2/xtensa-lx106-elf</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include</Value>
@@ -494,18 +464,9 @@ build.arch=ESP8266
       <Value>C:/Users/Ivanov/Documents/Arduino/libraries/DallasTemperature</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/Ticker</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266HTTPUpdateServer/src</Value>
+      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266mDNS</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WiFi/src</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WebServer/src</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266mDNS</Value>
-      <Value>C:/Users/Ivanov/Documents/Arduino/libraries/DallasTemperature/utility</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/EEPROM/utility</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266HTTPUpdateServer/src/utility</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266mDNS/utility</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WebServer/src/utility</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WiFi/src/utility</Value>
-      <Value>C:/Users/Ivanov/Documents/Arduino/libraries/OneWire/utility</Value>
-      <Value>C:/Users/Ivanov/Documents/Arduino/libraries/PubSubClient/src/utility</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/Ticker/utility</Value>
       <Value>C:/Program Files (x86)/Arduino/libraries</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries</Value>
       <Value>C:/Users/Ivanov/Documents/Arduino/libraries</Value>
@@ -517,7 +478,6 @@ build.arch=ESP8266
       <Value>../../../esp8266-sensor</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/tools/sdk/include</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0/tools/sdk/lwip/include</Value>
-      <Value>C:/Users/Ivanov/AppData/Local/Temp/VMBuilds/esp8266-sensor/esp8266_nodemcuv2/core</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2/xtensa-lx106-elf</Value>
       <Value>C:/Users/Ivanov/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include</Value>
