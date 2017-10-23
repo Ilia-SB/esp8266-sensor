@@ -22,6 +22,7 @@ public:
 		char address[7];
 		char ssid[13];
 		char password[13];
+		char hostname[13];
 		char mqttHost[16];
 		int mqttPort;
 		char mqttUser[13];
@@ -38,6 +39,7 @@ public:
 	static void setAddress(String* address);
 	static void setSsid(String* ssid);
 	static void setPassword(String* password);
+	static void setHostName(String* hostname);
 	static void setMqttHost(String* mqttHost);
 	static void setMqttUser(String* mqttUser);
 	static void setMqttPassword(String* mqttPassword);

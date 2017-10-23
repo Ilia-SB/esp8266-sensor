@@ -444,6 +444,10 @@ void startSettingsServer() {
 		"<input type=\"text\" name=\"password\" maxlength=\"12\" value=\"%s\"/>"
 		"</li>"
 		"<li>"
+		"<label>WiFi hostname </label>"
+		"<input type=\"text\" name=\"hostname\" maxlength=\"12\" value=\"%s\"/>"
+		"</li>"
+		"<li>"
 		"<label>Mqtt host </label>"
 		"<input type=\"text\" name=\"mqttHost\" maxlength=\"12\" value=\"%s\"/>"
 		"</li>"
@@ -466,7 +470,7 @@ void startSettingsServer() {
 		"</form>"
 		"</body>"
 		"</html>",
-	sett.settings.address, sett.settings.ssid, sett.settings.password, sett.settings.mqttHost, sett.settings.mqttPort, sett.settings.mqttUser, sett.settings.mqttPassword);
+	sett.settings.address, sett.settings.ssid, sett.settings.password, sett.settings.hostname, sett.settings.mqttHost, sett.settings.mqttPort, sett.settings.mqttUser, sett.settings.mqttPassword);
 	
 	DebugPrintln("Starting settings server.");
 	httpServer.on("/", handleRoot);
@@ -527,6 +531,7 @@ void loadSettings() {
 	DebugPrintf("Unit address: %s\r\n", sett.settings.address);
 	DebugPrintf("WiFi SSID: %s\r\n", sett.settings.ssid);
 	DebugPrintf("WiFi password: %s\r\n", sett.settings.password);
+	DebugPrintf("WiFi hostname: %s\r\n", sett.settings.hostname);
 	DebugPrintf("Mqtt host: %s\r\n", sett.settings.mqttHost);
 	DebugPrintf("Mqtt port: %d\r\n", sett.settings.mqttPort);
 	DebugPrintf("Mqtt user: %s\r\n", sett.settings.mqttUser);
@@ -552,6 +557,8 @@ void handleSaveSettings() {
 	sett.setSsid(&s);
 	s=httpServer.arg("password");
 	sett.setPassword(&s);
+	s=httpServer.arg("hostname");
+	sett.setHostName(&s);
 	s=httpServer.arg("mqttHost");
 	sett.setMqttHost(&s);
 	sett.settings.mqttPort = httpServer.arg("mqttPort").toInt();
@@ -717,6 +724,7 @@ void setup()
 	loadSettings();
 	loadConfig();
 	DebugPrintf("This unit's address is: %s\n", sett.settings.address);
+	WiFi.hostname(sett.settings.hostname);
 	
 // 	memcpy(heater.address, address, ADDR_LEN);
 // 	uint8_t len;

@@ -37,6 +37,10 @@ void Settings::setSsid(String* ssid) {
 	fillProperty(settings.ssid, ssid);
 }
 
+void Settings::setHostName(String* hostname) {
+	fillProperty(settings.hostname, hostname);
+}
+
 void Settings::setPassword(String* password) {
 	fillProperty(settings.password, password);
 }
