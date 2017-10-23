@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <Arduino.h>
+#include "debug_print.h"
 
 class Settings
 {

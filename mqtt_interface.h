@@ -15,6 +15,7 @@ const char* isEnabledItem = "isenabled";
 const char* targetTempItem = "targettemp";
 const char* hysteresisItem = "hysteresis";
 const char* temperatureAdjustItem = "tempadjust";
+const char* eraseSettingsItem = "erasesettings";
 const char* eepromErrorItem = "eeprom_error";
 const char* temperatureReadErrorItem = "temp_read_error";
 
