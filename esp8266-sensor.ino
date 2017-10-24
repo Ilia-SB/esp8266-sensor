@@ -15,6 +15,12 @@
 #include "mqtt_interface.h"
 #include "eepromAddr.h"
 #include "Settings.h"
+/*
+extern "C" {
+	#include "user_interface.h"
+}
+*/
+
 
 #define LED			2
 #define ONE_WIRE	5
@@ -724,7 +730,7 @@ void setup()
 	loadSettings();
 	loadConfig();
 	DebugPrintf("This unit's address is: %s\n", sett.settings.address);
-	WiFi.hostname(sett.settings.hostname);
+	DebugPrintf("Setting WIFI hostname to: %s\n", sett.settings.hostname);
 	
 // 	memcpy(heater.address, address, ADDR_LEN);
 // 	uint8_t len;
@@ -827,6 +833,8 @@ void loop()
 	} else { //If wifi is not connected
 		if (!flagWifiIsConnecting) {
 			DebugPrintln("Starting wifi connection.");
+			//wifi_station_set_hostname(sett.settings.hostname);
+			WiFi.hostname(sett.settings.hostname);
 			WiFi.begin(sett.settings.ssid, sett.settings.password);
 			blinker.attach_ms(50, blink);
 			flagWifiIsConnecting = true;
