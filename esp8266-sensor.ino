@@ -30,54 +30,6 @@ static PROGMEM prog_uint32_t crc_table[16] = {0x00000000, 0x1db71064, 0x3b6e20c8
 	0xedb88320, 0xf00f9344, 0xd6d6a3e8, 0xcb61b38c, 0x9b64c2b0, 0x86d3d2d4, 0xa00ae278, 0xbdbdf21c};
 	
 char SETTINGS_HTML[2048];
-/* = "<!DOCTYPE HTML>"
-"<html>"
-"<head>"
-"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">"
-"<title>Settings</title>"
-"</head>"
-"<body>"
-"<form method=\"post\" action=\"/savesettings\">"
-"<h2>Settings</h2>"
-"<p></p>"
-"</div>"
-"<ul >"
-"<li>"
-"<label>Unit address </label>"
-"<input type=\"text\" name=\"addr\" maxlength=\"6\" value=\"\"/>"
-"</li>"
-"<li>"
-"<label>WiFi SSID </label>"
-"<input type=\"text\" name=\"ssid\" maxlength=\"12\" value=\"\"/>"
-"</li>"
-"<li>"
-"<label>WiFi password </label>"
-"<input type=\"text\" name=\"password\" maxlength=\"12\" value=\"\"/>"
-"</li>"
-"<li>"
-"<label>Mqtt host </label>"
-"<input type=\"text\" name=\"mqttHost\" maxlength=\"12\" value=\"\"/>"
-"</li>"
-"<li>"
-"<label>Mqtt PORT </label>"
-"<input type=\"text\" name=\"mqttPort\" maxlength=\"4\" value=\"\"/>"
-"</li>"
-"<li>"
-"<label>Mqtt user </label>"
-"<input type=\"text\" name=\"mqttUser\" maxlength=\"12\" value=\"\"/>"
-"</li>"
-"<li>"
-"<label>Mqtt password </label>"
-"<input maxlength=\"12\" name=\"mqttPassword\" value=\"\"/>"
-"</li>"
-"<li>"
-"<input type=\"submit\" name=\"submit\" value=\"Submit\" />"
-"</li>"
-"</ul>"
-"</form>"
-"</body>"
-"</html>";
-*/
 	
 Settings sett;
 File configFile, settingsFile;
@@ -89,6 +41,7 @@ DallasTemperature sensor(&oneWire);
 
 float temp;
 float hysteresis;
+unsigned long settingsServerStartTime;
 
 bool flagProcessHeater = false;
 bool flagSetEepromError = false, flagClearEepromError = false;
@@ -96,6 +49,7 @@ bool flagWifiConnected = false, flagWifiIsConnecting = false;
 bool flagNetworkServicesInitialized = false;
 bool flagMqttIsConnected = false, flagMqttIsConnecting = false;
 bool flagMqttTryConnect = false;
+bool flagSettingsServerStarted = false;
 
 #define MAX_COMMAND_LEN 15
 
@@ -121,6 +75,10 @@ void publishMessage(float);
 void blink() {
 	int state = digitalRead(LED);
 	digitalWrite(LED, !state);
+}
+
+unsigned long elapsedSince(unsigned long start) {
+		return (unsigned long)(millis() - start);
 }
 
 void requestTemp() {
@@ -688,13 +646,13 @@ unsigned long crc_byte(byte *b, int len)
 }
 
 void onWIFIConnected(const WiFiEventStationModeGotIP& event) {
-	DebugPrintln("WIFI connection event");
+	//DebugPrintln("WIFI connection event");
 	flagWifiConnected = true;
 	flagWifiIsConnecting = false;
 }
 
 void onWIFIDisconnected(const WiFiEventStationModeDisconnected& event) {
-	DebugPrintln("WIFI disconnection event");
+	//DebugPrintln("WIFI disconnection event");
 	flagWifiConnected = false;
 	flagNetworkServicesInitialized = false;
 	flagMqttIsConnected = false;
@@ -716,26 +674,11 @@ void setup()
 	DebugPrintln("Starting...");
 	FSInfo fsInfo;
 	SPIFFS.begin();
-	/*
-	if (!SPIFFS.info(fsInfo)) {
-		DebugPrintln("File system not formatted. Formatting...");
-		if (SPIFFS.format()) {
-			DebugPrintln("Done.");
-		} else {
-			DebugPrintln("Failed.");
-		}
-	}
-	*/
 		
 	loadSettings();
 	loadConfig();
 	DebugPrintf("This unit's address is: %s\n", sett.settings.address);
 	DebugPrintf("Setting WIFI hostname to: %s\n", sett.settings.hostname);
-	
-// 	memcpy(heater.address, address, ADDR_LEN);
-// 	uint8_t len;
-// 	heater.getAddressString(sett.settings.address, &len);
-
 	
 	WiFi.persistent(false);
 	wifiConnectHandler = WiFi.onStationModeGotIP(&onWIFIConnected);
@@ -831,13 +774,41 @@ void loop()
 			}						
 		}
 	} else { //If wifi is not connected
-		if (!flagWifiIsConnecting) {
-			DebugPrintln("Starting wifi connection.");
+		if (!flagWifiIsConnecting) { //and is not connecting
+			DebugPrintln("Starting connection to WiFi network.");
 			//wifi_station_set_hostname(sett.settings.hostname);
 			WiFi.hostname(sett.settings.hostname);
 			WiFi.begin(sett.settings.ssid, sett.settings.password);
 			blinker.attach_ms(50, blink);
 			flagWifiIsConnecting = true;
+		} else { //Wifi is connecting. Check status
+			if (WiFi.status() == WL_NO_SSID_AVAIL) { //No network
+				if (!flagSettingsServerStarted) { //if settings server not started
+					DebugPrintln("No WiFi network. Going into settings mode for 1 minute.");
+					startWifiAP();
+					startSettingsServer();
+					httpServer.begin();
+					settingsServerStartTime = millis();
+					flagSettingsServerStarted = true;
+				} else { //if settings server is already running
+					if (elapsedSince(settingsServerStartTime) < 60000) { //if less than one minute passed
+						httpServer.handleClient();
+					} else { //one minute has passed
+						if (WiFi.softAPgetStationNum() == 0) { //if no clients connected we can close settings server and check for available network again
+							DebugPrintln("Retrying connection to WiFi network.");
+							httpServer.close();
+							flagSettingsServerStarted = false;
+							DebugPrintln("Starting wifi connection.");
+							WiFi.hostname(sett.settings.hostname);
+							WiFi.begin(sett.settings.ssid, sett.settings.password);
+							blinker.attach_ms(50, blink);
+							flagWifiIsConnecting = true;
+						} else { //clients connected, process them
+							httpServer.handleClient();
+						}
+					}
+				}
+			}
 		}
 	}
 	

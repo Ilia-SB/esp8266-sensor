@@ -24,7 +24,7 @@ Settings::~Settings()
 void fillProperty(char* dest, String* src) {
 	memset(buffer, '\0', 13);
 	src->toCharArray(buffer, 13);
-	memcpy(dest, buffer, src->length());
+	memcpy(dest, buffer, 13);
 }
 
 void Settings::setAddress(String* address) {
