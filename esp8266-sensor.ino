@@ -401,31 +401,31 @@ void startSettingsServer() {
 		"</li>"
 		"<li>"
 		"<label>WiFi SSID </label>"
-		"<input type=\"text\" name=\"ssid\" maxlength=\"12\" value=\"%s\"/>"
+		"<input type=\"text\" name=\"ssid\" maxlength=\"31\" value=\"%s\"/>"
 		"</li>"
 		"<li>"
 		"<label>WiFi password </label>"
-		"<input type=\"text\" name=\"password\" maxlength=\"12\" value=\"%s\"/>"
+		"<input type=\"password\" name=\"password\" maxlength=\"31\" value=\"%s\"/>"
 		"</li>"
 		"<li>"
 		"<label>WiFi hostname </label>"
-		"<input type=\"text\" name=\"hostname\" maxlength=\"12\" value=\"%s\"/>"
+		"<input type=\"text\" name=\"hostname\" maxlength=\"31\" value=\"%s\"/>"
 		"</li>"
 		"<li>"
 		"<label>Mqtt host </label>"
-		"<input type=\"text\" name=\"mqttHost\" maxlength=\"12\" value=\"%s\"/>"
+		"<input type=\"text\" name=\"mqttHost\" maxlength=\"31\" value=\"%s\"/>"
 		"</li>"
 		"<li>"
 		"<label>Mqtt PORT </label>"
-		"<input type=\"text\" name=\"mqttPort\" maxlength=\"4\" value=\"%d\"/>"
+		"<input type=\"text\" name=\"mqttPort\" maxlength=\"5\" value=\"%d\"/>"
 		"</li>"
 		"<li>"
 		"<label>Mqtt user </label>"
-		"<input type=\"text\" name=\"mqttUser\" maxlength=\"12\" value=\"%s\"/>"
+		"<input type=\"text\" name=\"mqttUser\" maxlength=\"31\" value=\"%s\"/>"
 		"</li>"
 		"<li>"
 		"<label>Mqtt password </label>"
-		"<input maxlength=\"12\" name=\"mqttPassword\" value=\"%s\"/>"
+		"<input maxlength=\"31\" name=\"mqttPassword\" value=\"%s\"/>"
 		"</li>"
 		"<li>"
 		"<input type=\"submit\" name=\"submit\" value=\"Submit\" />"
@@ -463,7 +463,7 @@ void loadSettings() {
 		}
 		return;
 	}
-	byte settingsBuffer[100];
+	byte settingsBuffer[sett.getSettingsSize() + sizeof(unsigned long)];
 	memset(settingsBuffer, '\0', 100);
 	DebugPrintf("Reading %d bytes.\n", sett.getSettingsSize());
 	uint8_t dataLen = sett.getSettingsSize();
@@ -530,20 +530,6 @@ void handleSaveSettings() {
 	sett.setMqttUser(&s);
 	s=httpServer.arg("mqttPassword");
 	sett.setMqttPassword(&s);
-	
-	/*
-	uint8_t settingsBuffer[100];
-	uint8_t dataLen = sett.getSettingsSize();
-	DebugPrintf("Settings size: %d\n", dataLen);
-	DebugPrintf("Settings pointer: %p\n", sett.getSettingsPointer());
-	memcpy(settingsBuffer, sett.getSettingsPointer(), dataLen);
-	unsigned long crc = crc_byte(settingsBuffer, dataLen);
-	memcpy(settingsBuffer + dataLen, &crc, sizeof(crc));
-	dataLen += sizeof(crc);
-	settingsBuffer[dataLen] = '\0';
-	DebugPrintf("Raw settings: %s\n", settingsBuffer);
-	*/
-	
 	saveSettings(&sett);
 	httpServer.send(200, "text/html", "Rebooting...");
 	SPIFFS.end();
@@ -589,7 +575,7 @@ void saveConfig(HeaterItem* item, size_t len) {
 
 void saveSettings(const Settings* s) {
 	DebugPrintln("Saving settings.");
-	byte settingsBuffer[100];
+	byte settingsBuffer[sett.getSettingsSize() + sizeof(unsigned long)];
 	uint8_t dataLen = s->getSettingsSize();
 	memcpy(settingsBuffer, s->getSettingsPointer(), dataLen);
 	DebugPrintf("Settings size: %d\n", dataLen);

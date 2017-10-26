@@ -9,7 +9,7 @@
 #include "Settings.h"
 
 Settings::StructSettings Settings::settings;
-char buffer[13];
+char buffer[FIELD_LENGTH];
 
 // default constructor
 Settings::Settings()
@@ -22,13 +22,13 @@ Settings::~Settings()
 } //~Settings
 
 void fillProperty(char* dest, String* src) {
-	memset(buffer, '\0', 13);
-	src->toCharArray(buffer, 13);
-	memcpy(dest, buffer, 13);
+	memset(buffer, '\0', FIELD_LENGTH);
+	src->toCharArray(buffer, FIELD_LENGTH);
+	memcpy(dest, buffer, FIELD_LENGTH);
 }
 
 void Settings::setAddress(String* address) {
-	memset(buffer, '\0', 13);
+	memset(buffer, '\0', 7);
 	address->toCharArray(buffer, 7);
 	memcpy(settings.address, buffer, 7);
 }

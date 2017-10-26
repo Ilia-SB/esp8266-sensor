@@ -16,17 +16,19 @@
 
 class Settings
 {
-//variables
+
+#define FIELD_LENGTH 32
+
 public:
 	struct __attribute__((__packed__)) StructSettings {
 		char address[7];
-		char ssid[13];
-		char password[13];
-		char hostname[13];
-		char mqttHost[16];
+		char ssid[FIELD_LENGTH];
+		char password[FIELD_LENGTH];
+		char hostname[FIELD_LENGTH];
+		char mqttHost[FIELD_LENGTH];
 		int mqttPort;
-		char mqttUser[13];
-		char mqttPassword[13];
+		char mqttUser[FIELD_LENGTH];
+		char mqttPassword[FIELD_LENGTH];
 	};
 	static StructSettings settings;
 protected:
