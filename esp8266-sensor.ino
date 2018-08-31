@@ -437,6 +437,7 @@ void startSettingsServer() {
 	sett.settings.address, sett.settings.ssid, sett.settings.password, sett.settings.hostname, sett.settings.mqttHost, sett.settings.mqttPort, sett.settings.mqttUser, sett.settings.mqttPassword);
 	
 	DebugPrintln("Starting settings server.");
+	DebugPrintln(SETTINGS_HTML);
 	httpServer.on("/", handleRoot);
 	httpServer.on("/savesettings", handleSaveSettings);
 }
